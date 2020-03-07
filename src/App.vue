@@ -1,28 +1,158 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <header>
+      <h1>Welcome to cleaning IKON</h1>
+      <nav>
+        <ul>
+          <li>
+            <router-link to="/artists">artists</router-link>
+          </li>
+          <li>
+            <router-link to="/exhibitions">exhibitions</router-link>
+          </li>
+          <li>
+            <router-link to="/galleries">galleries</router-link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <div id="status" v-if="loadingStatus=='loading'">{{loadingStatus}}</div>
+      <router-view></router-view>
+    </main>
+    <footer>
+    </footer>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Vue from 'vue'
 
+
+/* COMPNENTS */
+// import HelloWorld from './components/HelloWorld.vue'
+import ExhibitionListView from './components/ExhibitionListView.vue'
+import ArtistListView from './components/ArtistListView.vue'
+
+
+/* ROUTING */
+import router from './router'
+
+/* Store */
+import store from './store'
+
+
+/* MAIN APP */
 export default {
   name: 'App',
+  store,
+  router,
   components: {
-    HelloWorld
+    ExhibitionListView,
+    ArtistListView
+  },
+
+  mounted: function(){
+    this.$store.dispatch('fetchDatabase');
+  },
+
+  computed: {
+    loadingStatus: function(){
+      return this.$store.state.loadingStatus;
+    }
   }
 }
 </script>
 
 <style>
+body{
+  background-color: hsl(0, 0%, 95%);
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  position: relative;
+  padding: 1em;
+  background-color: white;
+  font-family: "Roboto", helvetica, arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  max-width: 34em;
+  margin: 1em auto;
+}
+
+header nav ul{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+header nav li{
+  display: inline-block;
+  margin-right: 0.5em;
+}
+
+/*** Table Styles **/
+table{
+  border-collapse: collapse;
+  padding: 1px;
+  background: white;
+  width: 100%;
+  table-layout: fixed;
+}
+
+thead {
+  color:white;
+  background-color: hsl(155, 73%, 64%);
+  font-weight: 100;
+  text-align:left;
+  vertical-align:middle;
+}
+
+tbody tr:hover{
+  background: hsl(44, 98%, 67%);
+}
+tbody{
+  line-height: 1em;
+}
+tr{
+  line-height: 1em;
+  /*max-height: 1em;*/
+}
+   
+td {
+  padding: 1em;
+  text-align:left;
+  vertical-align:middle;
+  font-weight:300;
+  overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/*** Table Styles **/
+input{
+  padding: 1em;
+  border: none;
+}
+
+input:focus{
+  outline: none;
+}
+
+#status{
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1em;
+  background-color: white;
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
+}
+
+a{
+  color: inherit;
+  text-decoration: none;
+}
+a:hover{
+  text-decoration: underline;
 }
 </style>
