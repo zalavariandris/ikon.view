@@ -31,8 +31,8 @@ import Vue from 'vue'
 
 /* COMPNENTS */
 // import HelloWorld from './components/HelloWorld.vue'
-import ExhibitionListView from './components/ExhibitionListView.vue'
-import ArtistListView from './components/ArtistListView.vue'
+import ExhibitionListView from './views/ExhibitionListView.vue'
+import ArtistListView from './views/ArtistListView.vue'
 
 
 /* ROUTING */
@@ -112,6 +112,11 @@ thead {
 tbody tr:hover{
   background: hsl(44, 98%, 67%);
 }
+
+.notExhibition{
+  opacity: 0.5;
+}
+
 tbody{
   line-height: 1em;
 }

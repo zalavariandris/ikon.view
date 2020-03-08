@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import ExhibitionListView from '../components/ExhibitionListView.vue'
-import ArtistListView from '../components/ArtistListView.vue'
-import GalleryListView from '../components/GalleryListView.vue'
+import ExhibitionListView from '../views/ExhibitionListView.vue'
+import ArtistListView from '../views/ArtistListView.vue'
+import GalleryListView from '../views/GalleryListView.vue'
 
-import ExhibitionView from '../components/ExhibitionView.vue'
-import ArtistView from '../components/ArtistView.vue'
-import GalleryView from '../components/GalleryView.vue'
+import ExhibitionView from '../views/ExhibitionView.vue'
+import ArtistView from '../views/ArtistView.vue'
+import GalleryView from '../views/GalleryView.vue'
 
 Vue.use(VueRouter)
 const routes = [
