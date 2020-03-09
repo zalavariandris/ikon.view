@@ -17,7 +17,10 @@
       </nav>
     </header>
     <main>
-      <div id="status" v-if="loadingStatus=='loading'">{{loadingStatus}}</div>
+      <div id="status" v-if="loadingStatus=='loading'">
+      <label for="db">loading...</label>
+      <progress id="db" v-bind:value="loadingProgress*100" max="100">{{loadingProgress*100}}%</progress>
+    </div>
       <router-view></router-view>
     </main>
     <footer>
@@ -59,6 +62,9 @@ export default {
   computed: {
     loadingStatus: function(){
       return this.$store.state.loadingStatus;
+    },
+    loadingProgress: function(){
+      return this.$store.state.loadingProgress;
     }
   }
 }
@@ -77,7 +83,7 @@ body{
   font-size: 14px;
   font-weight: 400;
   text-rendering: optimizeLegibility;
-  max-width: 34em;
+  max-width: 46em;
   margin: 1em auto;
 }
 
@@ -111,6 +117,9 @@ thead {
 
 tbody tr:hover{
   background: hsl(44, 98%, 67%);
+}
+table td{
+  vertical-align: top;
 }
 
 .notExhibition{

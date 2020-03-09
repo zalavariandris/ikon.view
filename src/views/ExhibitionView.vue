@@ -1,8 +1,9 @@
 <template>
   <div>
     <header>
+      <h1>Exhibition</h1>
       <h2>{{exhibition.title}}</h2>
-      <p>{{exhibition.date}}</p>
+      <p>{{exhibition.openingDate}}-{{exhibition.closingDate}}</p>
       <p>
         <router-link :to="{name: 'gallery', params: {id: exhibition.gallery_id}}">
           {{exhibition.gallery}}
@@ -50,101 +51,20 @@
     store,
     computed: {
       exhibition: function(){
-        if(this.$store.state.database == undefined)
-          return {};
-
-        // let sql = `
-        // SELECT id, title, date, gallery_id
-        // FROM exhibitions 
-        
-        // `;
-
-        let sql = `
-        SELECT e.ikonid, e.title, e.date, g.ikonid, g.name
-        FROM exhibitions e
-        JOIN galleries g ON g.ikonid=e.gallery_id
-        WHERE e.ikonid = ${this.$route.params.id}
-        LIMIT 1;
-        `;
-        
-        let results = this.$store.state.database.exec(sql);
-        let row = results[0].values[0]
-        return {
-          id: row[0],
-          title: row[1],
-          date: row[2],
-          gallery_id: row[3],
-          gallery: row[4]
-        }
+        console.log('exhibition')
+        return this.$store.getters.getExhibitionById(this.$route.params.id)
       },
       
       artists: function(){
-        if(!this.$store.state.database)
-          return [];
-        
-        const sql = `
-        SELECT DISTINCT a.id, a.name
-        FROM exhibitingOn ae
-        INNER JOIN artists a ON a.id = ae.artist_id
-        WHERE ae.exhibition_id = ${this.$route.params.id}
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-        if(!results[0])
-          return [];
-
-        return results[0].values.map((row)=>{
-          return {
-            id: row[0],
-            name: row[1]
-          }
-        });
+        return this.$store.getters.getArtistsByExhibitionId(this.$route.params.id)
       },
 
       curators: function(){
-        if(!this.$store.state.database)
-          return [];
-        
-        const sql = `
-        SELECT DISTINCT a.id, a.name
-        FROM curatingThe ae
-        INNER JOIN artists a ON a.id = ae.artist_id
-        WHERE ae.exhibition_id = ${this.$route.params.id}
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-        if(!results[0])
-          return [];
-
-        return results[0].values.map((row)=>{
-          return {
-            id: row[0],
-            name: row[1]
-          }
-        });
+        return this.$store.getters.getCuratorsByExhibitionId(this.$route.params.id)
       },
 
       opening: function(){
-        if(!this.$store.state.database)
-          return [];
-        
-        const sql = `
-        SELECT DISTINCT a.id, a.name
-        FROM openingThe ae
-        INNER JOIN artists a ON a.id = ae.artist_id
-        WHERE ae.exhibition_id = ${this.$route.params.id}
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-        if(!results[0])
-          return [];
-
-        return results[0].values.map((row)=>{
-          return {
-            id: row[0],
-            name: row[1]
-          }
-        });
+        return this.$store.getters.getOpeningspeechByExhibitionId(this.$route.params.id)
       }
     }
   }

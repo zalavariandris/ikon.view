@@ -42,62 +42,16 @@
     
     computed:{
       galleries: function(){
-        if(this.$store.state.database == undefined)
-          return []
-
-        // query database
-        let sql = `
-        SELECT ikonid, name
-        FROM galleries
-        WHERE name LIKE '%${this.search}%'
-        LIMIT ${this.limit} OFFSET ${this.page-1}*${this.limit};
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0]['values'].map((row)=>{
-          return {
-            'id': row[0],
-            'name': row[1]
-          }
-        });
+        return this.$store.getters.getGalleriesLikeName(this.search, this.limit, this.page);
       },
+
       count: function(){
-        if(!this.$store.state.database)
-          return NaN
-
-        let sql = `
-        SELECT COUNT(ikonid)
-        FROM galleries
-        WHERE name LIKE '%${this.search}%'
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0].values[0][0]
+        return this.$store.getters.galleriesCount;
       },
+
       resultsCount: function(){
-        if(!this.$store.state.database)
-          return NaN
+        return this.$store.getters.getGalleriesLikeNameCount(this.search);
 
-        let sql = `
-        SELECT COUNT(ikonid)
-        FROM galleries
-        WHERE name LIKE '%${this.search}%'
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0].values[0][0]
       }
     },
 

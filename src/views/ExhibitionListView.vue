@@ -8,10 +8,10 @@
     </vpaginate>
     <table>
       <thead>
-        <td>title</td>
-        <td>date</td>
-        <td>
-        gallery</td>
+        <td width="50%">title</td>
+        <td width="60px">opening</td>
+        <td width="60px">closing</td>
+        <td width="20%">gallery</td>
       </thead>
       <tbody>
         <tr 
@@ -26,7 +26,11 @@
               {{e.title}}
             </router-link>
           </td>
-          <td>{{e.date}}</td>
+          <td>
+            <small>{{e.openingDate}}</small>
+          </td>
+          <td>
+            <small>{{e.closingDate}}</small>
           <td>
             <router-link :to="{
               name: 'gallery', 
@@ -59,69 +63,15 @@
     
     computed:{
       exhibitions: function(){
-        if(this.$store.state.database == undefined)
-          return []
-
-        // query database
-        let sql = `
-        SELECT e.ikonid, e.title, e.date, e.isExhibition, g.ikonid, g.name
-        FROM exhibitions e
-        JOIN galleries g ON g.ikonid=e.gallery_id
-        WHERE title LIKE '%${this.search}%'
-        ORDER BY date DESC
-        LIMIT ${this.limit} OFFSET ${this.page-1}*${this.limit};
-        `;
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0]['values'].map((row)=>{
-          return {
-            'id': row[0],
-            'title': row[1],
-            'date': row[2],
-            'isExhibition': row[3],
-            'gallery_id': row[4],
-            'gallery': row[5]
-          }
-        });
-      },
-
-      count: function(){
-        if(!this.$store.state.database)
-          return NaN
-
-        let sql = `
-        SELECT COUNT(ikonid)
-        FROM exhibitions
-        `
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0].values[0][0]
+        return this.$store.getters.getExhibitionsLikeTitle(this.search, this.limit, this.page);
       },
 
       resultsCount: function(){
-        if(!this.$store.state.database)
-          return NaN
+        return this.$store.getters.getExhibitionsLikeTitleCount(this.search);
+      },
 
-        let sql = `
-        SELECT COUNT(ikonid)
-        FROM exhibitions
-        WHERE title LIKE '%${this.search}%'
-        `
-
-        let results = this.$store.state.database.exec(sql);
-
-        if(!results[0])
-          return [];
-
-        return results[0].values[0][0]
+      count: function(){
+        return this.$store.getters.exhibitionsCount;
       }
     },
 
