@@ -3,8 +3,12 @@
     <header>
       <h1>Artist</h1>
       <h2>{{artist.name}}</h2>
+      <section style="float: right; text-align: right;">
+        <input id='showNetwork' type='checkbox' v-model="showNetwork">
+        <label for='showNetwork'>show network</label>
+        <d3graph v-if="showNetwork" :graph="bipartedGraph"></d3graph>
+      </section>
     </header>
-
     <main>
       <section>
         <h3>Exhibitions</h3>
@@ -45,22 +49,14 @@
         </ol>
       </section>
     </main>
-
-    <section class="egoNetwork">
-      <header>
-        <h3>Ego network</h3>
-        <input id="showEgonetwork" type="checkbox" v-model="showEgonetwork">
-        <label for="showEgonetwork">show ego network</label>
-      </header>
-      <d3graph v-if="showEgonetwork" :graph="egoNetwork" ></d3graph>
-    </section>
   </div>
 </template>
 
 <script>
-  import store from '../store'
-  import * as jsnx from 'jsnetworkx'
-  import d3graph from '../components/d3graph.vue'
+  import store from '../store';
+  import * as jsnx from 'jsnetworkx';
+  import d3graph from '../components/d3graph.vue';
+  import chroma from 'chroma-js';
   export default {
     name: 'ArtistView',
     components: {
@@ -69,7 +65,7 @@
     store,
     data: function(){
       return{
-        showEgonetwork: false
+        showNetwork: false
       }
     },
     computed: {
@@ -89,11 +85,71 @@
         return this.$store.getters.getExhibitionsByOpeningspeechId(this.$route.params.id);
       },
 
+      bipartedGraph: function(){
+        this.artists
+        this.exhibtions
+
+        // let all_artists = this.$store.getters.getArtistsByExhibitionIds(exhibitions.map( (e)=>e.id));
+        // let all_exhibitions = this.$store.getters.getExhibitionsByArtistIds(all_artists.map( (f)=>f.id))
+
+        let G = new jsnx.Graph();
+        window.G = G;
+        let a = this.artist;
+        G.addNode("a"+a.id, {label: a.name})
+        for(let e of this.exhibitions){
+          G.addNode("e"+e.id, {label: e.title});
+          G.addEdge("a"+a.id, "e"+e.id, {weight: 1/this.exhibitions.length})
+
+          for(let friend of this.$store.getters.getArtistsByExhibitionId(e.id)){
+            G.addNode("a"+friend.id, {label: friend.name});
+            if(!G.hasEdge("e"+e.id, 'a'+friend.id)){
+              G.addEdge("e"+e.id, 'a'+friend.id, {weight: 1});
+            }else{
+              G.adj.get("e"+e.id).get('a'+friend.id).weight+=1;
+            }
+          }
+        }
+
+        // filter nodes by degree
+        for(let n of G.nodes()){
+          G.node.get(n).degree = G.degree(n)
+        }
+        let sumDegree = 0;
+        for(let n of G.nodes(true)){
+          sumDegree+=n[1]['degree']
+        }
+        for(let n of G.nodes(true)){
+          G.node.get(n[0])['degreeCentrality'] = n[1]['degree']/sumDegree;
+        }
+
+        let subnodes = G.nodes().filter( (n)=>G.degree(n)>1 )
+        G = G.subgraph(subnodes);
+
+        return {
+          nodes: G.nodes(true).map( (n)=>{
+            return {
+              id: n[0],
+              label: n[1]['label'],
+              size: n[0][0]=='a' ? n[1]['degreeCentrality']**0.8*2000 : 40,
+              color: n[0][0]=="a" ? 'hsl(155, 73%, 64%)' : 'lightgrey',
+              x: Math.random()*1000,
+              y: Math.random()*1000
+            };
+          }),
+
+          edges: G.edges(true).map( (e)=>{
+            return {
+              source: e[0],
+              target: e[1],
+              weight: e[2]['weight'],
+              color: chroma.random().hex()
+            };
+          })
+        }
+      },
+
       egoNetwork: function(){
         const self = this;
-
-
-
         // root node
         let artist = this.$store.getters.getArtistById(this.$route.params.id);
         // get all friends
@@ -136,16 +192,18 @@
             return {
               id: n[0],
               label: n[1]['label'],
-              size: Math.log1p(n[1]['size']*n[1]['size'])*30,
+              size: n[1]['size'],
               x: Math.random()*1000,
               y: Math.random()*1000
             };
           }),
 
-          edges: G.edges().map( (e)=>{
+          edges: G.edges(true).map( (e)=>{
             return {
               source: e[0],
-              target: e[1]
+              target: e[1],
+              weight: e[2]['weight'],
+              color: chroma.random().hex()
             };
           })
         }

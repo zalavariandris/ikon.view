@@ -5,13 +5,14 @@
 
 <script>
   import * as d3 from "d3";
+  window.d3 = d3;
   export default {
     name: 'ArtistView',
     props: ['graph'],
 
     mounted: function() {
       const width = 500;
-      const height = 500;
+      const height = 300;
       // create svg
       this.svg = d3.select(this.$el)
         .append('svg')
@@ -20,11 +21,13 @@
 
       // handle zoom with viewport
       this.viewport = this.svg.append("g").attr("class", "viewport");
-      this.zoom = d3.zoom().on("zoom",  ()=>{
-         this.viewport.attr("transform", d3.event.transform)
-      });
 
-      this.svg.call(this.zoom);
+      // this.zoom = d3.zoom().on("zoom",  ()=>{
+      //    this.viewport.attr("transform", d3.event.transform)
+      // });
+      // window.viewport = this.viewport
+
+      // this.svg.call(this.zoom);
 
       // create layers for nodes, links, labels
       this.viewport.append('g').attr('class', 'links');
@@ -32,7 +35,7 @@
       this.viewport.append('g').attr('class', 'labels');
 
       // simulation
-        this.simulation = d3.forceSimulation(this.graph.nodes)
+      this.simulation = d3.forceSimulation(this.graph.nodes)
         .force("charge", d3.forceManyBody().strength((d)=>d.size*-500))
         .force("link", d3.forceLink(this.graph.edges).id((d)=>d.id).distance(50).strength(1))
         .force("center", d3.forceCenter(this.$el.offsetWidth / 2, this.$el.offsetHeight / 2))
@@ -60,28 +63,48 @@
           .attr('x', (d)=>d.x)
           .attr('y', (d)=>d.y);
 
-          this.zoomFit(0.95, 100);
+          this.fit();
         })
         .stop();
+
       this.simulation.restart();
 
       // update
       this.updateNodes();
-      // this.updateLinks();
+      this.updateLinks();
       this.updateLabels();
+
+      window.d3graph = this;
     },
 
     watch: {
       graph: function(){
         console.log('d3graph', this.graph);
         this.updateNodes();
-        // this.updateLinks();
+        this.updateLinks();
         this.updateLabels();
         this.updateSimulation();
       }
     },
 
     methods: {
+      fit: function(){
+        let bounds = this.viewport.node().getBBox()
+        let fullWidth = this.svg.node().clientWidth;
+        let fullHeight = this.svg.node().clientHeight;
+
+        let width = bounds.width;
+        let height = bounds.height;
+        let midX = bounds.x+width/2
+        let midY = bounds.y+height/2
+
+        if(width==0 || height ==0) return; //nothing to fit
+        let scale = 1 / Math.max(width/fullWidth, height/fullHeight);
+        let translate = [fullWidth/2-scale*midX, fullHeight/2-scale*midY];
+
+        this.viewport.attr('transform', 
+          `translate(${translate[0]},${translate[1]}) scale(${scale})`);
+      },
       updateNodes: function(){
         // data join
         let node = this.viewport
@@ -96,7 +119,7 @@
         .attr('r',    (d)=> d.size || 10)
         .attr('fill', (d)=> d.color || 'darkseagreen')
         .attr('stroke', (d)=>'white')
-        .attr('stroke-width', (d)=>2)
+        .attr('stroke-width', (d)=>5)
 
         node.exit().remove();
       },
@@ -109,9 +132,9 @@
         // enter + update
         link.enter()
         .append('line')
-        .attr('visibility', 'hidden')
-        .attr('stroke', 'lightgrey')
-        .attr('stroke-width', 1)
+        .attr('visibility', 'visible')
+        .attr('stroke', 'rgb(240, 240, 240)')
+        .attr('stroke-width', '10')
         // .attr('opacity', 0.1)
         .merge(link)
         .attr('x1', (d)=>d.source.x)
@@ -130,8 +153,13 @@
         //enter + update
         label.enter()
         .append('text')
-        .text((d)=>d.label)
-        .attr('style', "user-select: none; pointer-events: none;")
+        .text((d)=>d.label.length<22 ? d.label : d.label.substring(0, 19)+'...')
+        .attr("text-anchor", "middle")
+        .attr('alignment-baseline', 'middle')
+        .attr('style', 'user-select: none; pointer-events: none;')
+        // .attr('style', 'text-shadow: 1px 1px 0px white;')
+        .attr('font-size', (d)=>d.size*0.7)
+        .attr('visibility', (d)=>d.size>30 ? 'visible' : 'hidden')
         .attr('fill', 'black')
         .merge(label)
         .attr('x', (d)=>d.x)
