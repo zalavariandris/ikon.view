@@ -332,16 +332,32 @@ export default new Vuex.Store({
       });
     },
 
-    getExhibitionsByArtistIds: (state, getters) => (ids)=>{
+    getExhibitionsByArtistIdWithArtistCount:(state, getters) => (id) => {
       if(!state.database)
           return [];
-      
+
       const sql = `
-      SELECT DISTINCT e.ikonid, e.title, e.openingDate, e.isExhibition
+      SELECT DISTINCT
+      e.ikonid,
+      e.title,
+      e.openingDate,
+      e.closingDate,
+      e.isExhibition,
+      metrics.artistsCount,
+      e.gallery_id,
+      g.name
       FROM exhibitions e
-      INNER JOIN exhibitingOn ae ON e.ikonid = ae.exhibition_id
-      WHERE ae.artist_id IN (${ids})
-      ORDER BY e.openingDate DESC;
+      INNER JOIN exhibitingOn ae ON e.ikonid==ae.exhibition_id
+      INNER JOIN artists a ON a.id==ae.artist_id
+      INNER JOIN galleries g ON g.ikonid == e.gallery_id
+      JOIN (
+          SELECT e.ikonid, COUNT(ae.exhibition_id) AS artistsCount
+          FROM EXHIBITIONS e
+          LEFT OUTER JOIN exhibitingOn ae ON e.ikonid = ae.exhibition_id
+          GROUP BY e.ikonid
+          ) metrics ON metrics.ikonid == e.ikonid
+      WHERE a.id = ${id}
+      ORDER BY e.openingDate DESC
       `;
 
       let results = state.database.exec(sql);
@@ -353,7 +369,11 @@ export default new Vuex.Store({
           id: row[0],
           title: row[1],
           openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
-          isExhibition: row[3]
+          closingDate: isNaN(new Date(row[3])) ? "" : new Date(row[3]).getFullYear(),
+          isExhibition: row[4],
+          artistsCount: row[5],
+          gallery_id: row[6],
+          gallery: row[7]
         }
       });
     },

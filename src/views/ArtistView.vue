@@ -6,53 +6,78 @@
       <section style="float: right; text-align: right;">
         <label for='showNetwork'>show network</label>
         <input id='showNetwork' type='checkbox' v-model="showNetwork">
-        
-
         <d3graphology v-if="showNetwork" :graph="bipartedGraphology"></d3graphology>
         <div class='stats'>
-          <span>nodes: {{bipartedGraphology.nodes().length}}
-          edges: {{bipartedGraphology.edges().length}}</span>
+            nodes: {{bipartedGraphology.nodes().length}}
+            edges: {{bipartedGraphology.edges().length}}
         </div>
       </section>
     </header>
     <main>
-      <section>
+      <section v-if="cv.length>0">
         <h3>Exhibitions</h3>
-        <ol>
-          <li v-for='e in exhibitions'
-              v-bind:key="e.id"
-              v-bind:class="{notExhibition: !e.isExhibition}">
-            <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-              <p>{{e.title}} <small>({{e.openingDate}})</small></p>
-            </router-link>
+        <ul>
+          <li v-for="group in cv">
+            {{group[0]}}
+            <ul>
+              <li class="exhibition"
+                  v-for='e in group[1]'
+                  v-bind:key="e.id"
+                  v-bind:class="{notExhibition: !e.isExhibition, solo: e.artistsCount<3}">
+                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
+                  {{e.title}}
+                  <small v-if="e.artistsCount==1">solo </small>
+                  <br/>
+                </router-link>
+                <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
+                <small>{{e.gallery}}</small>
+                </router-link>
+              </li>
+            </ul>
           </li>
-        </ol>
+        </ul>
       </section>
 
-      <section>
+      <section v-if="curatingcv.length>0">
         <h3>Curating</h3>
-        <ol>
-          <li v-for='e in curating' 
-              v-bind:key="e.id"
-              v-bind:class="{notExhibition: !e.isExhibition}">
-            <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-              <p>{{e.title}} <small>({{e.openingDate}})</small></p>
-            </router-link>
+        <ul>
+          <li v-for="group in curatingcv">
+            {{group[0]}}
+            <ul>
+              <li v-for='e in group[1]' 
+                  v-bind:key="e.id"
+                  v-bind:class="{notExhibition: !e.isExhibition}">
+                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
+                  {{e.title}}
+                </router-link>
+                <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
+                  {{e.gallery}}
+                </router-link>
+              </li>
+            </ul>
           </li>
-        </ol>
+        </ul>
       </section>
 
-      <section>
+      <section v-if="openingspeechcv.length>0">
         <h3>Opening</h3>
-        <ol>
-          <li v-for='e in openingspeech' 
-              v-bind:key="e.id"
-              v-bind:class="{notExhibition: !e.isExhibition}">
-            <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-              <p>{{e.title}} <small>({{e.openingDate}})</small></p>
-            </router-link>
+        <ul>
+          <li v-for="group in openingspeechcv">
+            {{group[0]}}
+            <ul>
+              <li v-for='e in group[1]' 
+                  v-bind:key="e.id"
+                  v-bind:class="{notExhibition: !e.isExhibition}">
+                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
+                  {{e.title}}
+                </router-link>
+                <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
+                  {{e.gallery}}
+                </router-link>
+              </li>
+            </ul>
           </li>
-        </ol>
+        </ul>
       </section>
     </main>
   </div>
@@ -72,24 +97,53 @@
     store,
     data: function(){
       return{
-        showNetwork: true
+        showNetwork: false
       }
     },
+
+    methods:{
+      groupBy: function(list, by){
+        let map = list.reduce(function (r, a) {
+          let g = a[by];
+          r.set(g, r.get(g) || []);
+          r.get(g).push(a);
+          return r;
+        }, new Map());
+
+        return [...map.entries()].sort( (a, b)=>b-a );
+      }
+    },
+
     computed: {
       artist: function(){
         return this.$store.getters.getArtistById(this.$route.params.id)
       },
       
       exhibitions: function(){
-        return this.$store.getters.getExhibitionsByArtistId(this.$route.params.id);
+        let es = this.$store.getters.getExhibitionsByArtistIdWithArtistCount(this.$route.params.id);
+        window.es = es;
+        return es;
+      },
+
+      cv: function(){
+        // return [...map.entries()].sort( (a, b)=>b-a );
+        return this.groupBy(this.exhibitions, 'openingDate')
       },
 
       curating: function(){
         return this.$store.getters.getExhibitionsByCuratorId(this.$route.params.id);
       },
 
+      curatingcv: function(){
+        return this.groupBy(this.curating, 'openingDate')
+      },
+
       openingspeech: function(){
         return this.$store.getters.getExhibitionsByOpeningspeechId(this.$route.params.id);
+      },
+
+      openingspeechcv: function(){
+        return this.groupBy(this.openingspeech, 'openingDate')
       },
 
       bipartedGraphology: function(){
@@ -100,7 +154,7 @@
           label: a.name, 
           color: 'hsl(155, 73%, 64%)'
         })
-        for(let e of this.exhibitions){
+        for(let e of this.exhibitions.filter( (e)=>e.isExhibition )){
           G.addNode("e"+e.id, {label: e.title, color: 'lightgrey' });
           G.addEdge("a"+a.id, "e"+e.id, {weight: 1/this.exhibitions.length})
 
@@ -138,7 +192,8 @@
         // set node visual attributes
         for(let n of G.nodes()){
           let centrality = G.getNodeAttribute(n, 'degreeCentrality');
-          G.setNodeAttribute(n, 'size', n[0]=='a' ? centrality**0.6*1000 : sumDegree/G.nodes().length*30);
+          let minsize = sumDegree/G.nodes().length*30
+          G.setNodeAttribute(n, 'size', n[0]=='a' ? centrality**0.6*1000+minsize/2 : minsize);
           G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightgrey')
         }
 
@@ -158,5 +213,25 @@
   font-size: 70%;
   font-style: italic;
   opacity: 0.5;
+}
+.solo{
+  font-weight: bold;
+}
+
+ul{
+  list-style: none;
+  padding-left: 1em;
+  margin-bottom: 2em;
+}
+
+ul ul{
+  padding: 0;
+  /*line-height: 1em;*/
+}
+ul ul li{
+  margin-top: 0.5em;
+}
+ul p{
+  margin: 0;
 }
 </style>
