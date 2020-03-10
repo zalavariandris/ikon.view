@@ -16,7 +16,7 @@ git subtree push --prefix dist origin gh-pages
 ```
 
 ## TODOS
-- move to graphology network representation
+- [ ] move to graphology network representation
 - ArtistView
   - [x] biparted ego network
   - [ ] tag solo exhibitions
