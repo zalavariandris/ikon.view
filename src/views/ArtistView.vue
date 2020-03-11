@@ -102,7 +102,7 @@
     store,
     data: function(){
       return{
-        showNetwork: true
+        showNetwork: false
       }
     },
 
