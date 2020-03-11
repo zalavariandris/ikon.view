@@ -18,33 +18,40 @@
         <a target='blank' :href="'https://ikon.hu/cal/'+exhibition.id">https://ikon.hu/cal/{{exhibition.id}}</a>
       </p>
     </header>
-    <section>
-      <h3>Artists</h3>
-      <ul>
-        <li v-for='a in artists' v-bind:key="a.id">
-          <router-link :to="{name: 'artist', params: {id: a.id}}">
-            {{a.name}}
-          </router-link>
-        </li>
-      </ul>
-
-      <h3>Curators</h3>
-      <ul>
-        <li v-for='a in curators' v-bind:key="a.id">
-          <router-link :to="{name: 'artist', params: {id: a.id}}">
-            {{a.name}}
-          </router-link>
-        </li>
-      </ul>
-
-      <h3>Opening</h3>
-      <ul>
-        <li v-for='a in opening' v-bind:key="a.id">
-          <router-link :to="{name: 'artist', params: {id: a.id}}">
-            {{a.name}}
-          </router-link>
-        </li>
-      </ul>
+    <section class='info'>
+      <section>
+        <h3>Artists</h3>
+        <ul>
+          <li v-for='a in artists' v-bind:key="a.id">
+            <router-link :to="{name: 'artist', params: {id: a.id}}">
+              {{a.name}}
+            </router-link>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3>Curators</h3>
+        <ul>
+          <li v-for='a in curators' v-bind:key="a.id">
+            <router-link :to="{name: 'artist', params: {id: a.id}}">
+              {{a.name}}
+            </router-link>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3>Opening</h3>
+        <ul>
+          <li v-for='a in opening' v-bind:key="a.id">
+            <router-link :to="{name: 'artist', params: {id: a.id}}">
+              {{a.name}}
+            </router-link>
+          </li>
+        </ul>
+      </section>
+    </section>
+    <section class="description">
+      {{exhibition.description}}
     </section>
   </div>
 </template>
@@ -74,3 +81,14 @@
     }
   }
 </script>
+
+<style>
+.info{
+  display: flex;
+}
+.description{
+  white-space: pre-wrap;
+  line-height: 2;
+  font-size: 80%;
+}  
+</style>

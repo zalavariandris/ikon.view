@@ -24,7 +24,7 @@ git subtree push --prefix dist origin gh-pages
 - [x] move to graphology network representation
 
 - ExhibitionView
-  - [ ] add description for exhibitions from ikon.hu/archive
+  - [x] add description for exhibitions from ikon.hu/archive
 
 - Store
   - [x] return date as ISO string 
@@ -42,10 +42,10 @@ git subtree push --prefix dist origin gh-pages
   - [ ] sort exhibiting, curating openingspeech secionts by count
 
 - ArtistsListView
-  - [ ] exhibition, opening amd curating count
+  - [ ] exhibition, opening and curating count
 
 - GalleryView
-  - [ ] group exhibitions by year
+  - [x] group exhibitions by year
   - [ ] ego network
 
 - vgraph
@@ -58,7 +58,7 @@ git subtree push --prefix dist origin gh-pages
 
 - d3graph
   - [x] zoom to fit content
-  - [ ] filter not exhibition events from graph
+  - [x] filter not exhibition events from graph
 
 - [ ] create deploy to gh-pages script
 

@@ -31,7 +31,7 @@ export default new Vuex.Store({
         locateFile: file => `./${file}`
       }).then((SQL)=>{
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', "./ikon_v002.db", true);
+        xhr.open('GET', "./ikon_v003.db", true);
         xhr.responseType = 'arraybuffer';
 
         xhr.onprogress = (e)=>{
@@ -249,7 +249,7 @@ export default new Vuex.Store({
         return null;
 
       let sql = `
-      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, g.ikonid, g.name
+      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, g.ikonid, g.name, e.description
       FROM exhibitions e
       JOIN galleries g ON g.ikonid=e.gallery_id
       WHERE e.ikonid = ${id}
@@ -264,7 +264,8 @@ export default new Vuex.Store({
         openingDate: row[2],
         closingDate: row[3],
         gallery_id: row[4],
-        gallery: row[5]
+        gallery: row[5],
+        description: row[6]
       }
     },
 
@@ -542,7 +543,7 @@ export default new Vuex.Store({
         return {
           id: row[0],
           title: row[1],
-          openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
+          openingDate: row[2],
           isExhibition: row[3]
         }
       });

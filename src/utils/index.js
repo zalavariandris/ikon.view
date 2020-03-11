@@ -1,7 +1,7 @@
 function groupBy(list, by){
   console.assert(typeof by == 'string' || typeof by =='function');
 
-  let map = list.reduce(function (r, a) {
+  return list.reduce(function (r, a) {
     if(typeof by == 'function')
       var group = by(a);
     else if(typeof by == 'string')
@@ -11,8 +11,6 @@ function groupBy(list, by){
     r.get(group).push(a);
     return r;
   }, new Map());
-
-  return [...map.entries()].sort( (a, b)=>b-a );
 }
 
 export {groupBy};

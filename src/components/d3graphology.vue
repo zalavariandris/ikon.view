@@ -5,6 +5,7 @@
 
 <script>
   import * as d3 from "d3";
+  import subGraph from 'graphology-utils/subgraph';
   window.d3 = d3;
   export default {
     name: 'd3graphology',
@@ -61,7 +62,7 @@
         console.log('init simulation')
         this.simgraph = {
           nodes: this.graph.nodes().map( (n)=>{
-            return {id: n};
+            return {id: n, r: this.graph.getNodeAttribute(n, 'size')};
           }),
 
           edges: this.graph.edges().map( (e)=>{
@@ -84,18 +85,32 @@
         .velocityDecay(0.90)
         .on("tick", ()=>{
           // move circles with simulation
-          let node = this.viewport.select('.nodes')
-          .selectAll('circle')
+          let node = this.viewport.selectAll('.node')
+          // .attr('style', (d)=> 'transform: translate('+d.x+'px, '+d.y+'px);' );
           .attr('cx', (d)=>d.x)
           .attr('cy', (d)=>d.y);
 
           // move lines with simulation
-          let link = this.viewport.select('.links')
-          .selectAll('line')
-          .attr('x1', (d)=>d.source.x)
-          .attr('y1', (d)=>d.source.y)
-          .attr('x2', (d)=>d.target.x)
-          .attr('y2', (d)=>d.target.y);
+          let link = this.viewport.selectAll('.link')
+          .attr('d', function(d){
+            
+            // Total difference in x and y from source to target
+            let diffX = d.target.x - d.source.x;
+            let diffY = d.target.y - d.source.y;
+
+            // Length of path from center of source node to center of target node
+            let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+            // x and y distances from center to outside edge of target node
+            let offset = 50;
+            let targetOffsetX = (diffX * d.target.r) / pathLength;
+            let targetOffsetY = (diffY * d.target.r) / pathLength;
+            let sourceOffsetX = (diffX * d.source.r) / pathLength;
+            let sourceOffsetY = (diffY * d.source.r) / pathLength;
+
+            return "M" + (d.source.x+sourceOffsetX) + "," + (d.source.y+sourceOffsetY) + 
+                   "L" + (d.target.x-targetOffsetX) + "," + (d.target.y-targetOffsetY);
+          });
 
           // move text with simulation
           let labels = this.viewport.select('.labels')
@@ -114,7 +129,7 @@
         console.log('update simulation');
         this.simgraph = {
           nodes: this.graph.nodes().map( (n)=>{
-            return {id: n};
+            return {id: n, r: this.graph.getNodeAttribute(n, 'size')};
           }),
 
           edges: this.graph.edges().map( (e)=>{
@@ -135,23 +150,50 @@
       },
 
       updateNodes: function(){
-        console.log('update nodes');
         // data join
-        let node = this.viewport
+        var node = this.viewport
         .select('.nodes')
-        .selectAll('circle')
-        .data(this.simgraph.nodes, (d)=>d);
-            
+        .selectAll('.node')
+        .data(this.simgraph.nodes, (d)=>d)
+
+        let showDetails = (d, i)=>{
+          let subnodes = this.graph.neighbors(d.id).concat([d.id]);
+          let H = subGraph(this.graph, subnodes);
+
+          this.viewport.classed('nodes-highlighted', true)
+
+          d3.selectAll('.node')
+          .filter( (d)=>H.hasNode(d.id))
+          .classed('highlighted', true)
+
+          d3.selectAll('.link')
+          .filter( (d)=>H.hasNode(d.source.id) && H.hasNode(d.target.id))
+          .classed('highlighted', true)
+        }
+
+        let hideDetails = (d, i)=>{
+          this.viewport.classed('nodes-highlighted', false)
+
+          d3.selectAll('.node')
+          .classed('highlighted', false);
+
+          d3.selectAll('.link')
+          .classed('highlighted', false);
+        }
+
         //enter + update
         node.enter()
-        .append('circle')
-        .merge(node)
-        .attr('r',    (d)=> this.graph.getNodeAttribute(d.id, 'size') || 40)
-        .attr('fill', (d)=> this.graph.getNodeAttribute(d.id, 'color') || 'darkseagreen')
-        .attr('stroke', (d)=>'white')
-        .attr('stroke-width', (d)=>5)
+          .append('circle')
+          .attr('class', 'node')
+          .classed('exhibition', (d)=>d.id[0]=='e' )
+          .classed('artist', (d)=>d.id[0]=='a' )
+          .merge(node)
+          .attr('r',    (d)=> this.graph.getNodeAttribute(d.id, 'size') || 40)
+          .on("mouseover", showDetails)
+          .on("mouseout", hideDetails)
 
         node.exit().remove();
+        console.log("update node", node)
       },
 
       initLinks: function(){
@@ -160,20 +202,36 @@
               
       updateLinks: function(){
         let link = this.viewport.select('.links')
-        .selectAll('line')
+        .selectAll('.link')
         .data(this.simgraph.edges, (d)=>d.source+d.target );
 
         // enter + update
         link.enter()
-        .append('line')
-        .attr('visibility', 'visible')
-        .attr('stroke', 'rgb(240, 240, 240)')
-        .attr('stroke-width', '10')
+        .append('path')
+        .attr('class', 'link')
         .merge(link)
-        .attr('x1', (d)=>d.source.x)
-        .attr('y2', (d)=>d.source.y)
-        .attr('x2', (d)=>d.target.x)
-        .attr('y2', (d)=>d.target.y);
+        .attr('d', function(d){
+          // Total difference in x and y from source to target
+          let diffX = d.target.x - d.source.x;
+          let diffY = d.target.y - d.source.y;
+
+          // Length of path from center of source node to center of target node
+          let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+          // x and y distances from center to outside edge of target node
+          let offset = 50;
+          let targetOffsetX = (diffX * d.target.r) / pathLength;
+          let targetOffsetY = (diffY * d.target.r) / pathLength;
+          let sourceOffsetX = (diffX * d.source.r) / pathLength;
+          let sourceOffsetY = (diffY * d.source.r) / pathLength;
+
+          return "M" + (d.source.x+sourceOffsetX) + "," + (d.source.y+sourceOffsetY) + 
+                 "L" + (d.target.x-targetOffsetX) + "," + (d.target.y-targetOffsetY);
+        });
+        // .attr('x1', (d)=>d.source.x)
+        // .attr('y2', (d)=>d.source.y)
+        // .attr('x2', (d)=>d.target.x)
+        // .attr('y2', (d)=>d.target.y);
 
         link.exit().remove();
       },
@@ -195,10 +253,8 @@
         .attr("text-anchor", "middle")
         .attr('alignment-baseline', 'middle')
         .attr('style', 'user-select: none; pointer-events: none;')
-        // .attr('style', 'text-shadow: 1px 1px 0px white;')
         .attr('font-size', (d)=>this.graph.getNodeAttribute(d.id, 'size')*0.5)
         // .attr('visibility', (d)=>this.graph.getNodeAttribute(d.id, 'size')>30 ? 'visible' : 'hidden')
-        .attr('fill', 'black')
         .merge(label)
         .attr('x', (d)=>d.x)
         .attr('y', (d)=>d.y);
@@ -246,3 +302,47 @@
     }
   }
 </script>
+
+<style>
+  .node{
+    fill: darkgrey;
+    transition: fill 0.1s;
+    transition: opacity 0.1s;
+  }
+  .node.artist{
+    fill: hsl(220, 26%, 68%);
+  }
+
+  .node.exhibition{
+    fill: hsl(48, 88%, 60%);
+  }
+
+  .node.highlighted{
+    
+  }
+
+  .viewport.nodes-highlighted .node.artist:not(.highlighted){
+    fill: hsl(220, 26%, 90%);
+  }
+
+  .viewport.nodes-highlighted .node.exhibition:not(.highlighted){
+    fill: hsl(48, 88%, 90%);
+  }
+
+  .link{
+    stroke: hsl(60, 18%, 87%);
+    stroke-width: 10px;
+    transition: stroke 0.3s;
+    transition: stroke-width 0.3s;
+  }
+
+  .link.highlighted{
+    stroke: hsl(60, 18%, 80%);
+    stroke-width: 15px;
+  }
+
+  text{
+    fill: black;
+    /*text-shadow: 1px 1px 0px white;*/
+  }
+</style>

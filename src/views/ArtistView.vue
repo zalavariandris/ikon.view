@@ -3,18 +3,22 @@
     <header>
       <h1>Artist</h1>
       <h2>{{artist.name}}</h2>
-      <section style="float: right; text-align: right;">
-        <label for='showNetwork'>show network</label>
-        <input id='showNetwork' type='checkbox' v-model="showNetwork">
+    </header>
+
+    <main>
+      <figure style="float: right; text-align: right;">
+        <figcaption>
+            <label for='showNetwork'>network</label>
+            <input id='showNetwork' type='checkbox' v-model="showNetwork"><br/>
+        </figcaption>
         <d3graphology v-if="showNetwork" :graph="bipartedGraphology"></d3graphology>
-        <div class='stats'>
+        <figcaption class='stats'>
             nodes: {{bipartedGraphology.nodes().length}}
             edges: {{bipartedGraphology.edges().length}}
-        </div>
-      </section>
-    </header>
-    <main>
-      <section v-if="cv.length>0">
+        </figcaption>
+      </figure>
+
+      <section v-if="cv.length">
         <h3>Exhibitions</h3>
         <ul>
           <li v-for="group in cv">
@@ -89,6 +93,7 @@
   import subGraph from 'graphology-utils/subgraph';
   import d3graphology from '../components/d3graphology.vue';
   import {groupBy} from '../utils'
+
   export default {
     name: 'ArtistView',
     components: {
@@ -97,7 +102,7 @@
     store,
     data: function(){
       return{
-        showNetwork: false
+        showNetwork: true
       }
     },
 
@@ -111,7 +116,8 @@
       },
 
       cv: function(){
-        return groupBy(this.exhibitions, (d)=>new Date(d['openingDate']).getFullYear())
+        const groups = groupBy(this.exhibitions, (d)=>new Date(d['openingDate']).getFullYear())
+        return [...groups.entries()].sort( (a, b)=>b-a );
       },
 
       curating: function(){
@@ -119,7 +125,8 @@
       },
 
       curatingcv: function(){
-        return groupBy(this.curating, (d)=>new Date(d['openingDate']).getFullYear())
+        const groups = groupBy(this.curating, (d)=>new Date(d['openingDate']).getFullYear())
+        return [...groups.entries()].sort( (a, b)=>b-a );
       },
 
       openingspeech: function(){
@@ -127,20 +134,58 @@
       },
 
       openingspeechcv: function(){
-        return groupBy(this.openingspeech, (d)=>new Date(d['openingDate']).getFullYear())
+        const groups = groupBy(this.openingspeech, (d)=>new Date(d['openingDate']).getFullYear())
+        return [...groups.entries()].sort( (a, b)=>b-a );
       },
 
       bipartedGraphology: function(){
+        // const getArtistLinks = (a)=>{
+        //   let opening = this.$store.getters.getExhibitionsByOpeningspeechId(a.slice(1))
+        //   .map( (e)=> new Object({u: a, v:'e'+e.id, relation: 'opening'}));
+          
+        //   let curating = this.$store.getters.getExhibitionsByCuratorId(a.slice(1))
+        //   .map( (e)=> new Object({u: a, v:'e'+e.id, relation: 'curating'}));
+          
+        //   let exhibiting = this.$store.getters.getExhibitionsByArtistIdWithArtistCount(a.slice(1))
+        //   .map( (e) => new Object({u: a, v: 'e'+e.id, relation: 'exhibiting'}));
+
+        //   return [].concat( opening, curating, exhibiting );
+        // }
+
+        // const getExhibitionLinks = (e)=>{
+        //   let curators = this.$store.getters.getCuratorsByExhibitionId(e.slice(1))
+        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'curating'}) );
+          
+        //   let artists = this.$store.getters.getArtistsByExhibitionId(e)
+        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'exhibiting'}) );
+          
+        //   let openingspeech = this.$store.getters.getOpeningspeechByExhibitionId(e.id)
+        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'opening'}) );
+
+        //   return [].concat( artists, curators, openingspeech );
+        // }
         // create graph
         let G = new graphology.Graph();
+
+
+        let root = [this.artist]
+
         let a = this.artist;
         G.addNode("a"+a.id, {
           label: a.name, 
           color: 'hsl(155, 73%, 64%)'
         })
-        for(let e of this.exhibitions.filter( (e)=>e.isExhibition )){
-          G.addNode("e"+e.id, {label: e.title, color: 'lightgrey' });
-          G.addEdge("a"+a.id, "e"+e.id, {weight: 1/this.exhibitions.length})
+
+
+        // for(let edge of getArtistLinks('a'+a.id)){
+        //   G.addNode(edge.v)
+        //   G.addEdge(edge.u, edge.v, {weight: 1, relation: edge.relation})
+        // }
+
+        // add exhibitingAt
+        for( let e of this.exhibitions ){
+          G.addNode('e'+e.id, {label: e.title, color: 'lightgrey' });
+          G.addEdge('a'+ a.id, 'e'+e.id, {'weight': 1});
 
           for(let friend of this.$store.getters.getArtistsByExhibitionId(e.id)){
             if(!G.hasNode("a"+friend.id)){
@@ -157,7 +202,7 @@
             }
           }
         }
-        
+
         // calculate degree centrality
         for(let n of G.nodes()){
           G.setNodeAttribute(n, 'degree',  G.degree(n));
@@ -178,7 +223,7 @@
           let centrality = G.getNodeAttribute(n, 'degreeCentrality');
           let minsize = sumDegree/G.nodes().length*30
           G.setNodeAttribute(n, 'size', n[0]=='a' ? centrality**0.6*1000+minsize/2 : minsize);
-          G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightgrey')
+          G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightslategray')
         }
 
         // drop leaf nodes
@@ -198,6 +243,7 @@
   font-style: italic;
   opacity: 0.5;
 }
+
 .solo{
   font-weight: bold;
 }
@@ -210,12 +256,18 @@ ul{
 
 ul ul{
   padding: 0;
+  margin-top: 0;
   /*line-height: 1em;*/
 }
 ul ul li{
-  margin-top: 0.5em;
+  /*margin-top: 0.5em;*/
+  display: inline;
 }
 ul p{
+  margin: 0;
+}
+
+figure{
   margin: 0;
 }
 </style>
