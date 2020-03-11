@@ -3,7 +3,12 @@
     <header>
       <h1>Exhibition</h1>
       <h2>{{exhibition.title}}</h2>
-      <p>{{exhibition.openingDate}}-{{exhibition.closingDate}}</p>
+      <p>
+        {{new Date(exhibition.openingDate).toLocaleDateString()}}
+        <span v-if="!isNaN(Date(exhibition.closingDate))">
+        - {{new Date(exhibition.closingDate).toLocaleDateString()}}
+        </span>
+      </p>
       <p>
         <router-link :to="{name: 'gallery', params: {id: exhibition.gallery_id}}">
           {{exhibition.gallery}}

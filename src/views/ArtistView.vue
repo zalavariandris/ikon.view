@@ -88,7 +88,7 @@
   import graphology from 'graphology';
   import subGraph from 'graphology-utils/subgraph';
   import d3graphology from '../components/d3graphology.vue';
-
+  import {groupBy} from '../utils'
   export default {
     name: 'ArtistView',
     components: {
@@ -101,33 +101,17 @@
       }
     },
 
-    methods:{
-      groupBy: function(list, by){
-        let map = list.reduce(function (r, a) {
-          let g = a[by];
-          r.set(g, r.get(g) || []);
-          r.get(g).push(a);
-          return r;
-        }, new Map());
-
-        return [...map.entries()].sort( (a, b)=>b-a );
-      }
-    },
-
     computed: {
       artist: function(){
         return this.$store.getters.getArtistById(this.$route.params.id)
       },
       
       exhibitions: function(){
-        let es = this.$store.getters.getExhibitionsByArtistIdWithArtistCount(this.$route.params.id);
-        window.es = es;
-        return es;
+        return this.$store.getters.getExhibitionsByArtistIdWithArtistCount(this.$route.params.id)
       },
 
       cv: function(){
-        // return [...map.entries()].sort( (a, b)=>b-a );
-        return this.groupBy(this.exhibitions, 'openingDate')
+        return groupBy(this.exhibitions, (d)=>new Date(d['openingDate']).getFullYear())
       },
 
       curating: function(){
@@ -135,7 +119,7 @@
       },
 
       curatingcv: function(){
-        return this.groupBy(this.curating, 'openingDate')
+        return groupBy(this.curating, (d)=>new Date(d['openingDate']).getFullYear())
       },
 
       openingspeech: function(){
@@ -143,7 +127,7 @@
       },
 
       openingspeechcv: function(){
-        return this.groupBy(this.openingspeech, 'openingDate')
+        return groupBy(this.openingspeech, (d)=>new Date(d['openingDate']).getFullYear())
       },
 
       bipartedGraphology: function(){

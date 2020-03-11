@@ -1,5 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
+import LandingPageView from '../views/LandingPageView.vue'
+
 import ExhibitionListView from '../views/ExhibitionListView.vue'
 import ArtistListView from '../views/ArtistListView.vue'
 import GalleryListView from '../views/GalleryListView.vue'
@@ -10,15 +13,22 @@ import GalleryView from '../views/GalleryView.vue'
 
 Vue.use(VueRouter)
 const routes = [
-  { path: '/exhibitions', component: ExhibitionListView },
-  { path: '/artists', component: ArtistListView },
-  { path: '/galleries', component: GalleryListView },
+  { name: 'home',        path: '/', component: LandingPageView},
+  { name: 'exhibitions', path: '/exhibitions',     component: ExhibitionListView },
+  { name: 'artists',     path: '/artists',         component: ArtistListView },
+  { name: 'galleries',	 path: '/galleries',       component: GalleryListView },
 
-  { name: 'exhibition', path: '/exhibition/:id', component: ExhibitionView},
-  { name: 'artist', path: '/artist/:id', component: ArtistView},
-  { name: 'gallery', path: '/gallery/:id', component: GalleryView},
+  { name: 'exhibition',  path: '/exhibitions/:id', component: ExhibitionView},
+  { name: 'artist',      path: '/artists/:id',     component: ArtistView},
+  { name: 'gallery',     path: '/galleries/:id',   component: GalleryView},
 ]
-
-export default new VueRouter({
-  routes // short for `routes: routes`
+const router = new VueRouter({
+  routes, // short for `routes: routes`
 });
+
+router.beforeEach( (to, from, next)=>{
+	document.body.className = to.name;
+	document.title = 'ikon.view - '+to.name;
+	next();
+} );
+export default router;

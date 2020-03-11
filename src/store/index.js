@@ -326,7 +326,7 @@ export default new Vuex.Store({
         return {
           id: row[0],
           title: row[1],
-          openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
+          openingDate: row[2],
           isExhibition: row[3]
         }
       });
@@ -368,8 +368,8 @@ export default new Vuex.Store({
         return {
           id: row[0],
           title: row[1],
-          openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
-          closingDate: isNaN(new Date(row[3])) ? "" : new Date(row[3]).getFullYear(),
+          openingDate: row[2],
+          closingDate: row[3],
           isExhibition: row[4],
           artistsCount: row[5],
           gallery_id: row[6],
@@ -398,7 +398,7 @@ export default new Vuex.Store({
         return {
           id: row[0],
           title: row[1],
-          openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
+          openingDate: row[2],
           isExhibition: row[3]
         }
       });
@@ -424,7 +424,7 @@ export default new Vuex.Store({
         return {
           id: row[0],
           title: row[1],
-          openingDate: isNaN(new Date(row[2])) ? "" : new Date(row[2]).getFullYear(),
+          openingDate: row[2],
           isExhibition: row[3]
         }
       });

@@ -1,7 +1,13 @@
 <template>
   <div id="app">
     <header>
-      <h1>Welcome to cleaning IKON</h1>
+      
+        <h1>
+          <router-link to="/">
+          Welcome to cleaning<br/> IKON
+          </router-link>
+        </h1>
+      
       <nav>
         <ul>
           <li>
@@ -18,9 +24,9 @@
     </header>
     <main>
       <div id="status" v-if="loadingStatus=='loading'">
-      <label for="db">loading...</label>
-      <progress id="db" v-bind:value="loadingProgress*100" max="100">{{loadingProgress*100}}%</progress>
-    </div>
+        <label for="db">loading...</label>
+        <progress id="db" v-bind:value="loadingProgress*100" max="100">{{loadingProgress*100}}%</progress>
+      </div>
       <router-view></router-view>
     </main>
     <footer>
@@ -71,11 +77,19 @@ export default {
 </script>
 
 <style>
+html{
+
+}
+
 body{
   background-color: hsl(0, 0%, 95%);
+  display: flex;
+  margin: 0;
+  min-height: 100vh;
 }
 
 #app {
+  flex-basis: 100%;
   position: relative;
   padding: 1em;
   background-color: white;
@@ -85,6 +99,13 @@ body{
   text-rendering: optimizeLegibility;
   max-width: 46em;
   margin: 1em auto;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#app main{
+  height: 100%;
 }
 
 header nav ul{

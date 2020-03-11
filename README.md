@@ -16,17 +16,37 @@ git subtree push --prefix dist origin gh-pages
 ```
 
 ## TODOS
+- [x] Landing page
+  - [ ] unified search with levenshtein distance
+
+- [ ] get rid of toplist
+
 - [x] move to graphology network representation
 
 - ExhibitionView
   - [ ] add description for exhibitions from ikon.hu/archive
 
+- Store
+  - [x] return date as ISO string 
+
+- Utils
+  - [x] group list of dict by key
+
 - ArtistView
   - [x] biparted ego network
+    - [ ] add curating and opening relation with edge colors
+    - [ ] color people nodes by profession
   - [x] tag solo exhibitions
   - [x] CV: group exhibitions by year
   - [ ] in curating or openingspeech sections, show artists, when not too many
   - [ ] sort exhibiting, curating openingspeech secionts by count
+
+- ArtistsListView
+  - [ ] exhibition, opening amd curating count
+
+- GalleryView
+  - [ ] group exhibitions by year
+  - [ ] ego network
 
 - vgraph
   - [x] d3graph
