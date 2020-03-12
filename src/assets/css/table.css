@@ -1,0 +1,47 @@
+/*** TABLE STYLES **/
+table{
+  border-collapse: collapse;
+  padding: 1px;
+  background: white;
+  width: 100%;
+  table-layout: fixed;
+}
+
+td{
+  vertical-align: top;
+}
+
+td {
+  padding: 1em;
+  text-align:left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* HEAD */
+thead {
+  font-weight: 100;
+  text-align:left;
+  border-bottom: 1px solid black;
+  font-style: oblique;
+}
+
+
+thead td{
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 0.5em;
+  padding-top: 1em;
+  margin-bottom: 1em;
+}
+
+/* BODY */
+tbody tr:hover{
+  background: hsl(44, 98%, 67%);
+}
+
+/* special cases */
+tr.notExhibition{
+  opacity: 1.0;
+  color: grey;
+}

@@ -1,7 +1,7 @@
 <template>
   <div class="ArtistListView">
     <h2>Artists
-    <small>{{count}}</small>
+    <small>({{count}})</small>
     </h2>
 
     <input v-model="search" placeholder="filter">

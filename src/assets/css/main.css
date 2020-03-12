@@ -9,6 +9,11 @@ body{
   min-height: 100vh;
 }
 
+.paginate{
+  float: right;
+  padding: 1em 0;
+}
+
 #app {
   flex-basis: 100%;
   position: relative;
@@ -41,51 +46,6 @@ header nav li{
 }
 
 /*** Table Styles **/
-table{
-  border-collapse: collapse;
-  padding: 1px;
-  background: white;
-  width: 100%;
-  table-layout: fixed;
-}
-
-thead {
-  color:white;
-  background-color: hsl(155, 73%, 64%);
-  font-weight: 100;
-  text-align:left;
-  vertical-align:middle;
-}
-
-tbody tr:hover{
-  background: hsl(44, 98%, 67%);
-}
-table td{
-  vertical-align: top;
-}
-
-.notExhibition{
-  opacity: 0.5;
-}
-
-tbody{
-  line-height: 1em;
-}
-tr{
-  line-height: 1em;
-  /*max-height: 1em;*/
-}
-
-td {
-  padding: 1em;
-  text-align:left;
-  vertical-align:middle;
-  font-weight:300;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/*** Table Styles **/
 input{
   padding: 1em;
   border: none;
@@ -96,12 +56,17 @@ input:focus{
 }
 
 #status{
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 1em;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 14px;
+  margin-left: -130px;
+  margin-top: -44px;
+  padding: 30px;
+
   background-color: white;
-  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
+  /*box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);*/
 }
 
 a{
@@ -110,4 +75,8 @@ a{
 }
 a:hover{
   text-decoration: underline;
+}
+
+.notExhibition{
+  opacity: 0.5;
 }

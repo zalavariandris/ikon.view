@@ -1,6 +1,6 @@
 <template>
   <div class="GalleryListView">
-    <h2>Galleries <small>{{count}}</small></h2>
+    <h2>Galleries <small>({{count}})</small></h2>
     <input v-model="search" placeholder="filter">
     <vpaginate 
       v-model="page"

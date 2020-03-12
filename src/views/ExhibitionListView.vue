@@ -2,7 +2,7 @@
   <div class="ExhibitionListView">
     <h2>Exhibitions <small>({{count}})</small></h2>
     <input v-model="search" placeholder="filter">
-    <vpaginate 
+    <vpaginate
       v-model="page"
       :count="Math.ceil(resultsCount/limit)">
     </vpaginate>

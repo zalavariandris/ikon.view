@@ -1,13 +1,11 @@
 <template>
   <div id="app">
     <header>
-      
         <h1>
           <router-link to="/">
           Welcome to cleaning<br/> IKON
           </router-link>
         </h1>
-      
       <nav>
         <ul>
           <li>
@@ -24,10 +22,10 @@
     </header>
     <main>
       <div id="status" v-if="loadingStatus=='loading'">
-        <label for="db">loading...</label>
+        <label for="db">loading data...</label>
         <progress id="db" v-bind:value="loadingProgress*100" max="100">{{loadingProgress*100}}%</progress>
       </div>
-      <router-view></router-view>
+      <router-view v-else></router-view>
     </main>
     <footer>
     </footer>
