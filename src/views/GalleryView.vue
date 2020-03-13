@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="gallery" class="GalleryView">
     <header>
       <h1>Gallery</h1>
       <h2>{{gallery.name}}</h2>
@@ -46,24 +46,3 @@
     }
   }
 </script>
-
-<style>
-ul{
-  list-style: none;
-  padding-left: 1em;
-  margin-bottom: 2em;
-}
-
-ul ul{
-  padding: 0;
-  margin-top: 0;
-  /*line-height: 1em;*/
-}
-ul ul li{
-  /*margin-top: 0.5em;*/
-  display: inline;
-}
-ul p{
-  margin: 0;
-}
-</style>

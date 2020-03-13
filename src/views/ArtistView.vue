@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="artist" class="ArtistView">
     <header>
       <h1>Artist</h1>
       <h2>{{artist.name}}</h2>
@@ -12,7 +12,7 @@
             <input id='showNetwork' type='checkbox' v-model="showNetwork"><br/>
         </figcaption>
         <d3graphology v-if="showNetwork" :graph="bipartedGraphology"></d3graphology>
-        <figcaption class='stats'>
+        <figcaption v-if="showNetwork" class='stats'>
             nodes: {{bipartedGraphology.nodes().length}}
             edges: {{bipartedGraphology.edges().length}}
         </figcaption>
@@ -20,9 +20,9 @@
 
       <section v-if="cv.length">
         <h3>Exhibitions</h3>
-        <ul>
+        <ul class=group>
           <li v-for="group in cv">
-            {{group[0]}}
+            <span class="label">{{group[0]}}</span>
             <ul>
               <li class="exhibition"
                   v-for='e in group[1]'
@@ -30,11 +30,11 @@
                   v-bind:class="{notExhibition: !e.isExhibition, solo: e.artistsCount<3}">
                 <router-link :to="{name: 'exhibition', params: {id: e.id}}">
                   {{e.title}}
-                  <small v-if="e.artistsCount==1">solo </small>
-                  <br/>
+                  <small v-if="e.artistsCount==1">(solo)</small>
                 </router-link>
+                -
                 <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
-                <small>{{e.gallery}}</small>
+                {{e.gallery}}
                 </router-link>
               </li>
             </ul>
@@ -44,9 +44,9 @@
 
       <section v-if="curatingcv.length>0">
         <h3>Curating</h3>
-        <ul>
+        <ul class=group>
           <li v-for="group in curatingcv">
-            {{group[0]}}
+            <span class="label">{{group[0]}}</span>
             <ul>
               <li v-for='e in group[1]' 
                   v-bind:key="e.id"
@@ -65,9 +65,9 @@
 
       <section v-if="openingspeechcv.length>0">
         <h3>Opening</h3>
-        <ul>
+        <ul class=group>
           <li v-for="group in openingspeechcv">
-            {{group[0]}}
+            <span class="label">{{group[0]}}</span>
             <ul>
               <li v-for='e in group[1]' 
                   v-bind:key="e.id"
@@ -102,7 +102,7 @@
     store,
     data: function(){
       return{
-        showNetwork: false
+        showNetwork: true
       }
     },
 
@@ -139,68 +139,43 @@
       },
 
       bipartedGraphology: function(){
-        // const getArtistLinks = (a)=>{
-        //   let opening = this.$store.getters.getExhibitionsByOpeningspeechId(a.slice(1))
-        //   .map( (e)=> new Object({u: a, v:'e'+e.id, relation: 'opening'}));
+        if(!this.$store.state.database)
+          return new graphology.Graph();
+
+        const sql = `
+        SELECT DISTINCT A.artist_id AS a, A.exhibition_id AS b, B.artist_id AS c, C.exhibition_id AS d
+        FROM exhibitingOn A
+        JOIN exhibitingOn B ON B.exhibition_id==A.exhibition_id
+        JOIN exhibitingOn C ON C.artist_id==B.artist_id
+        WHERE A.artist_id==${this.$route.params.id}
+        AND a!=c`
+
+        const result = this.$store.state.database.exec(sql);
+        if(!result[0])
+          return new graphology.Graph()
+
+        const paths = result[0].values
+
+        let G = new graphology.Graph()
+        window.G = G;
+        for(let path of paths){
+          if(!G.hasNode('a'+path[0]))
+            G.addNode('a'+path[0], {color:'red'})
+          if(!G.hasNode('e'+path[1]))
+            G.addNode('e'+path[1], {color:'yellow'})
+          if(!G.hasNode('a'+path[2]))
+            G.addNode('a'+path[2], {color:'lightblue'})
           
-        //   let curating = this.$store.getters.getExhibitionsByCuratorId(a.slice(1))
-        //   .map( (e)=> new Object({u: a, v:'e'+e.id, relation: 'curating'}));
-          
-        //   let exhibiting = this.$store.getters.getExhibitionsByArtistIdWithArtistCount(a.slice(1))
-        //   .map( (e) => new Object({u: a, v: 'e'+e.id, relation: 'exhibiting'}));
+          if(!G.hasEdge('a'+path[0], 'e'+path[1]))
+            G.addEdge('a'+path[0], 'e'+path[1])
+          if(!G.hasEdge('e'+path[1], 'a'+path[2]))
+            G.addEdge('e'+path[1], 'a'+path[2])
+        }
 
-        //   return [].concat( opening, curating, exhibiting );
-        // }
-
-        // const getExhibitionLinks = (e)=>{
-        //   let curators = this.$store.getters.getCuratorsByExhibitionId(e.slice(1))
-        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'curating'}) );
-          
-        //   let artists = this.$store.getters.getArtistsByExhibitionId(e)
-        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'exhibiting'}) );
-          
-        //   let openingspeech = this.$store.getters.getOpeningspeechByExhibitionId(e.id)
-        //   .map( (a)=>new Object({u: e, v: 'a'+a.id, relation: 'opening'}) );
-
-        //   return [].concat( artists, curators, openingspeech );
-        // }
-        // create graph
-        let G = new graphology.Graph();
-
-
-        let root = [this.artist]
-
-        let a = this.artist;
-        G.addNode("a"+a.id, {
-          label: a.name, 
-          color: 'hsl(155, 73%, 64%)'
-        })
-
-
-        // for(let edge of getArtistLinks('a'+a.id)){
-        //   G.addNode(edge.v)
-        //   G.addEdge(edge.u, edge.v, {weight: 1, relation: edge.relation})
-        // }
-
-        // add exhibitingAt
-        for( let e of this.exhibitions ){
-          G.addNode('e'+e.id, {label: e.title, color: 'lightgrey' });
-          G.addEdge('a'+ a.id, 'e'+e.id, {'weight': 1});
-
-          for(let friend of this.$store.getters.getArtistsByExhibitionId(e.id)){
-            if(!G.hasNode("a"+friend.id)){
-              G.addNode("a"+friend.id, {
-                label: friend.name, 
-                color: 'hsl(155, 73%, 64%)'
-              });
-            }
-            if(!G.hasEdge("e"+e.id, 'a'+friend.id)){
-              G.addEdge("e"+e.id, 'a'+friend.id, {weight: 1});
-            }else{
-              let w = G.setEdgeAttribute("e"+e.id, 'a'+friend.id);
-              G.setEdgeAttribute("e"+e.id, 'a'+friend.id, 'weight', w+1);
-            }
-          }
+        for(let path of paths){
+          if(G.hasNode(path[3]))
+            if(!G.hasEdge('a'+path[2], 'e'+path[3]))
+              G.addEdge('a'+path[2], 'e'+path[3])
         }
 
         // calculate degree centrality
@@ -220,19 +195,116 @@
 
         // set node visual attributes
         for(let n of G.nodes()){
-          let centrality = G.getNodeAttribute(n, 'degreeCentrality');
-          let minsize = sumDegree/G.nodes().length*30
-          G.setNodeAttribute(n, 'size', n[0]=='a' ? centrality**0.6*1000+minsize/2 : minsize);
-          G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightslategray')
+          let degreeCentrality = G.getNodeAttribute(n, 'degree');
+          let defaultSize = 10;
+          G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
+        }
+                
+        G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
+
+        // populate artists names
+        let artists = this.$store.getters.getArtistsByIds(
+          G.nodes()
+          .filter( (n)=>n[0]=='a' )
+          .map((n)=>parseInt(n.slice(1)))
+        );
+        for(let a of artists){
+          G.setNodeAttribute('a'+a.id, 'label', a.name)
         }
 
-        // drop leaf nodes
-        let subnodes = G.nodes().filter( (n)=>G.degree(n)>1 )
-        G = subGraph(G, subnodes);
 
-        //
+        // populate exhibition titles
+        let exhibitions = this.$store.getters.getExhibitionsByIds(
+          G.nodes()
+          .filter( (n)=>n[0]=='e' )
+          .map((n)=>parseInt(n.slice(1)))
+        );
+        console.log(exhibitions)
+        for(let e of exhibitions){
+          console.log(e);
+          G.setNodeAttribute('e'+e.id, 'label', e.title);
+          G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
+        }
         return G;
       }
+
+      // bipartedGraphology: function(){
+      //   // create graph
+      //   let G = new graphology.MultiGraph();
+      //   let root = [this.artist]
+      //   let a = this.artist;
+      //   G.addNode("a"+a.id, {
+      //     label: a.name, 
+      //     color: 'hsl(155, 73%, 64%)'
+      //   })
+
+      //   // build network from sql
+      //   for(let edge of this.$store.getters.getRelations(a.id, null)){
+      //     if(!G.hasNode('e'+edge.exhibition_id)) // eg. exhibiting and curating eg.
+      //       G.addNode('e'+edge.exhibition_id)
+      //     G.addEdge('a'+edge.artist_id, 'e'+edge.exhibition_id, {
+      //       relation: edge.relation
+      //     });
+
+      //     for(let edge of this.$store.getters.getRelations(null, edge.exhibition_id)){
+      //       if(!G.hasNode('a'+edge.artist_id))
+      //         G.addNode('a'+edge.artist_id);
+
+      //       G.addEdge('a'+edge.artist_id, 'e'+edge.exhibition_id,{
+      //         relation: edge.relation
+      //       });
+      //     }
+      //   }
+
+      //   // populate artists names
+      //   let artists = this.$store.getters.getArtistsByIds(
+      //     G.nodes()
+      //     .filter( (n)=>n[0]=='a' )
+      //     .map((n)=>parseInt(n.slice(1)))
+      //   );
+      //   for(let a of artists){
+      //     G.setNodeAttribute('a'+a.id, 'label', a.name)
+      //   }
+
+
+      //   // populate exhibition titles
+      //   let titles = new Map(this.exhibitions.map( (e)=>[e.id, e.title] ));
+      //   for(let e of this.exhibitions){
+      //     G.setNodeAttribute('e'+e.id, 'label', e.title);
+      //     G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
+      //   }
+
+      //   // filter out none xhibitionss
+      //   // G = subGraph(G, G.nodes().filter( (n)=> n[0]=='a' || G.getNodeAttribute(n, 'isExhibition') ));
+
+      //   // calculate degree centrality
+      //   for(let n of G.nodes()){
+      //     G.setNodeAttribute(n, 'degree',  G.degree(n));
+      //   }
+
+      //   let sumDegree = 0;
+      //   for(let n of G.nodes()){
+      //     sumDegree+=G.getNodeAttribute(n, 'degree');
+      //   }
+
+      //   for(let n of G.nodes()){
+      //     let degree = G.degree(n)//G.getNodeAttribute(n, 'degree');
+      //     G.setNodeAttribute(n, 'degreeCentrality', degree/sumDegree);
+      //   }
+
+      //   // set node visual attributes
+      //   for(let n of G.nodes()){
+      //     let degreeCentrality = G.getNodeAttribute(n, 'degree');
+      //     let defaultSize = 10;
+      //     G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
+      //     G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightslategray')
+      //   }
+
+      //   // drop leaf nodes
+      //   // G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
+      //   //
+      //   return G;
+      // }
     }
   }
 </script>
@@ -244,30 +316,15 @@
   opacity: 0.5;
 }
 
-.solo{
+li.solo>a:nth-child(1){
   font-weight: bold;
-}
-
-ul{
-  list-style: none;
-  padding-left: 1em;
-  margin-bottom: 2em;
-}
-
-ul ul{
-  padding: 0;
-  margin-top: 0;
-  /*line-height: 1em;*/
-}
-ul ul li{
-  /*margin-top: 0.5em;*/
-  display: inline;
-}
-ul p{
-  margin: 0;
 }
 
 figure{
   margin: 0;
+}
+
+li>a:nth-child(2){
+
 }
 </style>

@@ -49,11 +49,11 @@
 
     watch: {
       graph: function(){
+        console.log('chaged');
         this.updateSimulation();
         this.updateNodes();
         this.updateLinks();
         this.updateLabels();
-        
       }
     },
 
@@ -84,39 +84,10 @@
         }))
         .velocityDecay(0.90)
         .on("tick", ()=>{
-          // move circles with simulation
-          let node = this.viewport.selectAll('.node')
-          // .attr('style', (d)=> 'transform: translate('+d.x+'px, '+d.y+'px);' );
-          .attr('cx', (d)=>d.x)
-          .attr('cy', (d)=>d.y);
-
-          // move lines with simulation
-          let link = this.viewport.selectAll('.link')
-          .attr('d', function(d){
-            
-            // Total difference in x and y from source to target
-            let diffX = d.target.x - d.source.x;
-            let diffY = d.target.y - d.source.y;
-
-            // Length of path from center of source node to center of target node
-            let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
-            // x and y distances from center to outside edge of target node
-            let offset = 50;
-            let targetOffsetX = (diffX * d.target.r) / pathLength;
-            let targetOffsetY = (diffY * d.target.r) / pathLength;
-            let sourceOffsetX = (diffX * d.source.r) / pathLength;
-            let sourceOffsetY = (diffY * d.source.r) / pathLength;
-
-            return "M" + (d.source.x+sourceOffsetX) + "," + (d.source.y+sourceOffsetY) + 
-                   "L" + (d.target.x-targetOffsetX) + "," + (d.target.y-targetOffsetY);
-          });
-
-          // move text with simulation
-          let labels = this.viewport.select('.labels')
-          .selectAll('text')
-          .attr('x', (d)=>d.x)
-          .attr('y', (d)=>d.y);
+          // update svg elements
+          this.updateNodes();
+          this.updateLinks();
+          this.updateLabels();
 
           // zoom to fit content
           this.fit();
@@ -187,13 +158,14 @@
           .attr('class', 'node')
           .classed('exhibition', (d)=>d.id[0]=='e' )
           .classed('artist', (d)=>d.id[0]=='a' )
-          .merge(node)
           .attr('r',    (d)=> this.graph.getNodeAttribute(d.id, 'size') || 40)
           .on("mouseover", showDetails)
           .on("mouseout", hideDetails)
+          .merge(node)
+          .attr('cx', (d)=>d.x)
+          .attr('cy', (d)=>d.y);
 
         node.exit().remove();
-        console.log("update node", node)
       },
 
       initLinks: function(){
@@ -219,19 +191,15 @@
           let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
 
           // x and y distances from center to outside edge of target node
-          let offset = 50;
-          let targetOffsetX = (diffX * d.target.r) / pathLength;
-          let targetOffsetY = (diffY * d.target.r) / pathLength;
-          let sourceOffsetX = (diffX * d.source.r) / pathLength;
-          let sourceOffsetY = (diffY * d.source.r) / pathLength;
+          let keepDistance = 10;
+          let targetOffsetX = (diffX * (d.target.r+keepDistance)) / (pathLength);
+          let targetOffsetY = (diffY * (d.target.r+keepDistance)) / (pathLength);
+          let sourceOffsetX = (diffX * (d.source.r+keepDistance)) / (pathLength);
+          let sourceOffsetY = (diffY * (d.source.r+keepDistance)) / (pathLength);
 
           return "M" + (d.source.x+sourceOffsetX) + "," + (d.source.y+sourceOffsetY) + 
                  "L" + (d.target.x-targetOffsetX) + "," + (d.target.y-targetOffsetY);
         });
-        // .attr('x1', (d)=>d.source.x)
-        // .attr('y2', (d)=>d.source.y)
-        // .attr('x2', (d)=>d.target.x)
-        // .attr('y2', (d)=>d.target.y);
 
         link.exit().remove();
       },
@@ -249,13 +217,23 @@
         //enter + update
         label.enter()
         .append('text')
-        .text((d)=>this.graph.getNodeAttribute(d.id, 'label').length<21 ? this.graph.getNodeAttribute(d.id, 'label') : this.graph.getNodeAttribute(d.id, 'label').substring(0, 21)+'...')
+        .text((d)=>{
+          const hasLabel = this.graph.getNodeAttribute(d.id, 'label');
+          if(!hasLabel)
+            return;
+          const label =  this.graph.getNodeAttribute(d.id, 'label');
+          const isShort = label.length<21;
+          if(isShort)
+            return label
+          else
+            return label.substring(0, 18)+"..."
+        })
         .attr("text-anchor", "middle")
         .attr('alignment-baseline', 'middle')
         .attr('style', 'user-select: none; pointer-events: none;')
-        .attr('font-size', (d)=>this.graph.getNodeAttribute(d.id, 'size')*0.5)
         // .attr('visibility', (d)=>this.graph.getNodeAttribute(d.id, 'size')>30 ? 'visible' : 'hidden')
         .merge(label)
+        .attr('font-size', (d)=>this.graph.getNodeAttribute(d.id, 'size')*0.5)
         .attr('x', (d)=>d.x)
         .attr('y', (d)=>d.y);
 

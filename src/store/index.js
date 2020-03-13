@@ -57,22 +57,62 @@ export default new Vuex.Store({
   },
 
   getters:{
-    getGalleriesLikeNameCount: (state) => (name) => {
+    artistsCount: (state) => {
       if(!state.database)
-        return NaN
+        return NaN;
 
       let sql = `
-      SELECT COUNT(ikonid)
-      FROM galleries
-      WHERE name LIKE '%${name}%'
+      SELECT COUNT(id)
+      FROM artists
       `;
 
       let results = state.database.exec(sql);
 
       if(!results[0])
+        return NaN;
+
+      return results[0].values[0][0];
+    },
+
+    getArtistById: (state, getters) => (id) => {
+        if(state.database == undefined)
+          return {};
+
+        let sql = `
+        SELECT id, name
+        FROM artists
+        WHERE id = ${id}
+        LIMIT 1;
+        `;
+        
+        let results = state.database.exec(sql);
+        let row = results[0].values[0]
+        return {
+          id: row[0],
+          name: row[1]
+        }
+    },
+
+    getArtistsByIds: (state, getters) => (ids) => {
+      if(state.database == undefined)
         return [];
 
-      return results[0].values[0][0]
+      let sql = `
+      SELECT id, name
+      FROM artists
+      WHERE id IN (${ids})
+      `;
+      
+      let results = state.database.exec(sql);
+
+      if(!results[0])
+        return [];
+      return results[0]['values'].map((row)=>{
+        return {
+          'id': row[0],
+          'name': row[1]
+        }
+      });
     },
 
     getArtistsLikeName: (state) => (name, limit, page) => {
@@ -119,6 +159,71 @@ export default new Vuex.Store({
 
       return results[0].values[0][0]
     },
+
+    getArtistsByExhibitionId: (state) => (id) => {
+      if(!state.database)
+        return [];
+      
+      const sql = `
+      SELECT DISTINCT a.id, a.name
+      FROM exhibitingOn ae
+      INNER JOIN artists a ON a.id = ae.artist_id
+      WHERE ae.exhibition_id = ${id}
+      `;
+
+      let results = state.database.exec(sql);
+      if(!results[0])
+        return [];
+
+      return results[0].values.map((row)=>{
+        return {
+          id: row[0],
+          name: row[1]
+        }
+      });
+    },
+
+    getArtistsByExhibitionIds: (state, getters) => (ids)=> {
+      if(!state.database)
+        return [];
+      
+      const sql = `
+      SELECT DISTINCT a.id, a.name
+      FROM exhibitingOn ae
+      INNER JOIN artists a ON a.id = ae.artist_id
+      WHERE ae.exhibition_id IN (${ids})
+      `;
+
+      let results = state.database.exec(sql);
+      if(!results[0])
+        return [];
+
+      return results[0].values.map((row)=>{
+        return {
+          id: row[0],
+          name: row[1]
+        }
+      });
+    },
+
+    getGalleriesLikeNameCount: (state) => (name) => {
+      if(!state.database)
+        return NaN
+
+      let sql = `
+      SELECT COUNT(ikonid)
+      FROM galleries
+      WHERE name LIKE '%${name}%'
+      `;
+
+      let results = state.database.exec(sql);
+
+      if(!results[0])
+        return [];
+
+      return results[0].values[0][0]
+    },
+
 
     getExhibitionsLikeTitle: (state) => (title, limit, page) => {
       if(state.database == undefined)
@@ -202,23 +307,6 @@ export default new Vuex.Store({
       return results[0].values[0][0]
     },
 
-    artistsCount: (state) => {
-      if(!state.database)
-        return NaN;
-
-      let sql = `
-      SELECT COUNT(id)
-      FROM artists
-      `;
-
-      let results = state.database.exec(sql);
-
-      if(!results[0])
-        return NaN;
-
-      return results[0].values[0][0];
-    },
-
     getGalleriesLikeName: (state) => (name, limit, page) => {
         if(state.database == undefined)
           return []
@@ -269,23 +357,29 @@ export default new Vuex.Store({
       }
     },
 
-    getArtistById: (state, getters) => (id) => {
-        if(state.database == undefined)
-          return {};
+    getExhibitionsByIds: (state, getters) => (ids) => {
+      if(state.database == undefined)
+        return null;
 
-        let sql = `
-        SELECT id, name
-        FROM artists
-        WHERE id = ${id}
-        LIMIT 1;
-        `;
-        
-        let results = state.database.exec(sql);
-        let row = results[0].values[0]
+      let sql = `
+      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, g.ikonid, g.name, e.description
+      FROM exhibitions e
+      JOIN galleries g ON g.ikonid=e.gallery_id
+      WHERE e.ikonid IN (${ids})
+      `;
+      
+      let results = state.database.exec(sql);
+      return results[0].values.map( (row)=>{
         return {
           id: row[0],
-          name: row[1]
+          title: row[1],
+          openingDate: row[2],
+          closingDate: row[3],
+          gallery_id: row[4],
+          gallery: row[5],
+          description: row[6]
         }
+      });
     },
 
     getGalleryById: (state, getters) => (id) => {
@@ -431,52 +525,6 @@ export default new Vuex.Store({
       });
     },
 
-    getArtistsByExhibitionId: (state) => (id) => {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT a.id, a.name
-      FROM exhibitingOn ae
-      INNER JOIN artists a ON a.id = ae.artist_id
-      WHERE ae.exhibition_id = ${id}
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          name: row[1]
-        }
-      });
-    },
-
-    getArtistsByExhibitionIds: (state, getters) => (ids)=> {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT a.id, a.name
-      FROM exhibitingOn ae
-      INNER JOIN artists a ON a.id = ae.artist_id
-      WHERE ae.exhibition_id IN (${ids})
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          name: row[1]
-        }
-      });
-    },
-
     getCuratorsByExhibitionId: (state) => (id) => {
       if(!state.database)
         return [];
@@ -545,6 +593,62 @@ export default new Vuex.Store({
           title: row[1],
           openingDate: row[2],
           isExhibition: row[3]
+        }
+      });
+    },
+
+
+    // Links
+    getRelations: (state) => (artist_id=undefined, exhibition_id=undefined) => {
+      if(!state.database)
+        return [];
+      // construct sql
+      let sql = "SELECT 'exhibiting' As Type, artist_id, exhibition_id FROM exhibitingOn\n"
+      if(artist_id && exhibition_id){
+        sql+= `WHERE artist_id==${artist_id}\n`;
+        sql+= `AND exhibition_id==${exhibition_id}\n`;
+      }else{
+        if(artist_id)
+          sql+= `WHERE artist_id==${artist_id}\n`;
+        if(exhibition_id)
+          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
+      }
+              
+      sql+="UNION\n";
+      
+      sql+= "SELECT 'opening' As Type, artist_id, exhibition_id FROM openingThe\n"
+      if(artist_id && exhibition_id){
+        sql+= `WHERE artist_id==${artist_id}\n`;
+        sql+= `AND exhibition_id==${exhibition_id}\n`;
+      }else{
+        if(artist_id)
+          sql+= `WHERE artist_id==${artist_id}\n`;
+        if(exhibition_id)
+          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
+      }
+              
+      sql+="UNION\n"
+      
+      sql+= "SELECT 'curating' As Type, artist_id, exhibition_id FROM curatingThe\n"
+      if(artist_id && exhibition_id){
+        sql+= `WHERE artist_id==${artist_id}\n`;
+        sql+= `AND exhibition_id==${exhibition_id}\n`;
+      }else{
+        if(artist_id)
+          sql+= `WHERE artist_id==${artist_id}\n`;
+        if(exhibition_id)
+          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
+      }
+
+      let results = state.database.exec(sql);
+      if(!results[0])
+        return [];
+
+      return results[0].values.map((row)=>{
+        return {
+          relation: row[0],
+          artist_id: row[1],
+          exhibition_id: row[2]
         }
       });
     }

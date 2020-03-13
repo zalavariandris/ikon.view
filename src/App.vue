@@ -73,5 +73,3 @@ export default {
   }
 }
 </script>
-
-<!-- <style src='./assets/main.css'></style> -->
