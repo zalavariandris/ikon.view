@@ -4,10 +4,11 @@
       <h1>Exhibition</h1>
       <h2>{{exhibition.title}}</h2>
       <p>
-        {{new Date(exhibition.openingDate).toLocaleDateString()}}
-        <span v-if="!isNaN(Date(exhibition.closingDate))">
-        - {{new Date(exhibition.closingDate).toLocaleDateString()}}
-        </span>
+        {{exhibition.opening}}
+        {{new Date(exhibition.opening).toLocaleDateString()}}
+        <template v-if="!isNaN(new Date(exhibition.closing))">
+        - {{new Date(exhibition.closing).toLocaleDateString()}}
+        </template>
       </p>
       <p>
         <router-link :to="{name: 'gallery', params: {id: exhibition.gallery_id}}">
@@ -19,8 +20,9 @@
       </p>
     </header>
     <section class='info'>
-      <section>
-        <h3>Artists</h3>
+
+      <section v-if="artists.length>0">
+        <h3>Artist<template v-if="artists.length>1">s</template></h3>
         <ul>
           <li v-for='a in artists' v-bind:key="a.id">
             <router-link :to="{name: 'artist', params: {id: a.id}}">
@@ -29,8 +31,9 @@
           </li>
         </ul>
       </section>
-      <section>
-        <h3>Curators</h3>
+
+      <section v-if="curators.length>0">
+        <h3>Curator<template v-if="curators.length>1">s</template></h3>
         <ul>
           <li v-for='a in curators' v-bind:key="a.id">
             <router-link :to="{name: 'artist', params: {id: a.id}}">
@@ -39,19 +42,21 @@
           </li>
         </ul>
       </section>
-      <section>
-        <h3>Opening</h3>
+
+      <section v-if="hosts.length>0">
+        <h3>Host<template v-if="hosts.length>1">s</template></h3>
         <ul>
-          <li v-for='a in opening' v-bind:key="a.id">
+          <li v-for='a in hosts' v-bind:key="a.id">
             <router-link :to="{name: 'artist', params: {id: a.id}}">
               {{a.name}}
             </router-link>
           </li>
         </ul>
       </section>
+
     </section>
     <section class="description">
-      {{exhibition.description}}
+      {{description}}
     </section>
   </div>
 </template>
@@ -63,20 +68,29 @@
     store,
     computed: {
       exhibition: function(){
-        console.log('exhibition')
         return this.$store.getters.getExhibitionById(this.$route.params.id)
       },
       
-      artists: function(){
+      all: function(){
         return this.$store.getters.getArtistsByExhibitionId(this.$route.params.id)
       },
 
-      curators: function(){
-        return this.$store.getters.getCuratorsByExhibitionId(this.$route.params.id)
+      artists: function(){
+        return this.all.filter( (a)=>a.relation == 'exhibiting' );
       },
 
-      opening: function(){
-        return this.$store.getters.getOpeningspeechByExhibitionId(this.$route.params.id)
+      curators: function(){
+        return this.all.filter( (a)=>a.relation == 'curating' );
+      },
+
+      hosts: function(){
+        return this.all.filter( (a)=>a.relation == 'opening' );
+      },
+
+      description: function(){
+        if(!this.exhibition.description)
+          return null;
+        return this.exhibition.description.split('\n').filter((p)=>p!='').map((p)=>p.trim()).join('\n');
       }
     }
   }
@@ -86,8 +100,11 @@
 .info{
   display: flex;
 }
+.info>section{
+  margin-right: 2em;
+}
 .description{
-  white-space: pre-wrap;
+  white-space: pre-line;
   line-height: 2;
   font-size: 80%;
 }  

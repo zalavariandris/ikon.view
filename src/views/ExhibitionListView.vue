@@ -9,16 +9,14 @@
     <table>
       <thead>
         <td width="50%">title</td>
+        <td width="20%">gallery</td>
         <td width="60px">opening</td>
         <td width="60px">closing</td>
-        <td width="20%">gallery</td>
       </thead>
       <tbody>
         <tr 
         v-for='e in exhibitions' 
-        v-bind:key="e.id"
-        v-bind:class="{notExhibition: !e.isExhibition}"
-        >
+        v-bind:key="e.id">
           <td>
             <router-link v-bind:to="{
               name: 'exhibition', 
@@ -27,17 +25,19 @@
             </router-link>
           </td>
           <td>
-            <small>{{e.openingDate}}</small>
-          </td>
-          <td>
-            <small>{{e.closingDate}}</small>
-          <td>
             <router-link :to="{
               name: 'gallery', 
               params: {id: e.gallery_id}}">
               {{e.gallery}}
             </router-link>
           </td>
+          <td>
+            <small>{{e.opening}}</small>
+          </td>
+          <td>
+            <small>{{e.closing}}</small>
+          </td>
+
         </tr>
       </tbody>
     </table>
@@ -53,6 +53,9 @@
       vpaginate
     },
     store,
+    created: function(){
+      window.view = this;
+    },
     data: function(){
       return {
         search: "",

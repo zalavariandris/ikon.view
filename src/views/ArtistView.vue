@@ -11,72 +11,30 @@
             <label for='showNetwork'>network</label>
             <input id='showNetwork' type='checkbox' v-model="showNetwork"><br/>
         </figcaption>
-        <d3graphology v-if="showNetwork" :graph="bipartedGraphology"></d3graphology>
+        <d3graphology v-if="showNetwork" :graph="graph"></d3graphology>
         <figcaption v-if="showNetwork" class='stats'>
-            nodes: {{bipartedGraphology.nodes().length}}
-            edges: {{bipartedGraphology.edges().length}}
+            nodes: {{graph.nodes().length}}
+            edges: {{graph.edges().length}}
         </figcaption>
       </figure>
 
-      <section v-if="cv.length">
-        <h3>Exhibitions</h3>
+      <section v-for="section in cv">
+        <h3>{{section[0]}}</h3>
         <ul class=group>
-          <li v-for="group in cv">
-            <span class="label">{{group[0]}}</span>
+          <li v-for="group in groupBy(section[1], (e)=>new Date(e.opening).getFullYear())">
+            {{group[0]}}
             <ul>
               <li class="exhibition"
                   v-for='e in group[1]'
                   v-bind:key="e.id"
-                  v-bind:class="{notExhibition: !e.isExhibition, solo: e.artistsCount<3}">
+                   v-bind:class="{solo: section[0]=='Exhibitions' && e.artistsCount==1}">
                 <router-link :to="{name: 'exhibition', params: {id: e.id}}">
                   {{e.title}}
-                  <small v-if="e.artistsCount==1">(solo)</small>
+                  <small v-if="section[0]=='Exhibitions' && e.artistsCount==1">(solo)</small>
                 </router-link>
                 -
                 <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
                 {{e.gallery}}
-                </router-link>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </section>
-
-      <section v-if="curatingcv.length>0">
-        <h3>Curating</h3>
-        <ul class=group>
-          <li v-for="group in curatingcv">
-            <span class="label">{{group[0]}}</span>
-            <ul>
-              <li v-for='e in group[1]' 
-                  v-bind:key="e.id"
-                  v-bind:class="{notExhibition: !e.isExhibition}">
-                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-                  {{e.title}}
-                </router-link>
-                <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
-                  {{e.gallery}}
-                </router-link>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </section>
-
-      <section v-if="openingspeechcv.length>0">
-        <h3>Opening</h3>
-        <ul class=group>
-          <li v-for="group in openingspeechcv">
-            <span class="label">{{group[0]}}</span>
-            <ul>
-              <li v-for='e in group[1]' 
-                  v-bind:key="e.id"
-                  v-bind:class="{notExhibition: !e.isExhibition}">
-                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-                  {{e.title}}
-                </router-link>
-                <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
-                  {{e.gallery}}
                 </router-link>
               </li>
             </ul>
@@ -106,47 +64,48 @@
       }
     },
 
+    methods:{
+      groupBy
+    },
+
     computed: {
+      cv: function(){
+        return [
+          ['Exhibitions', this.exhibiting],
+          ['Host', this.hosting],
+          ['Curating', this.curating]
+        ].sort( (a, b)=>b[1].length-a[1].length )
+      },
+
       artist: function(){
-        return this.$store.getters.getArtistById(this.$route.params.id)
+        return this.$store.getters.getArtistById(this.$route.params.id);
       },
       
       exhibitions: function(){
-        return this.$store.getters.getExhibitionsByArtistIdWithArtistCount(this.$route.params.id)
+        return this.$store.getters.getExhibitionsByArtistId(this.$route.params.id);
       },
 
-      cv: function(){
-        const groups = groupBy(this.exhibitions, (d)=>new Date(d['openingDate']).getFullYear())
-        return [...groups.entries()].sort( (a, b)=>b-a );
+      exhibiting: function(){
+        return this.exhibitions.filter( (e)=>e.relation=='exhibiting' );
       },
 
       curating: function(){
-        return this.$store.getters.getExhibitionsByCuratorId(this.$route.params.id);
+        return this.exhibitions.filter( (e)=>e.relation=='curating' );
       },
 
-      curatingcv: function(){
-        const groups = groupBy(this.curating, (d)=>new Date(d['openingDate']).getFullYear())
-        return [...groups.entries()].sort( (a, b)=>b-a );
+      hosting: function(){
+        return this.exhibitions.filter( (e)=>e.relation=='opening' );
       },
 
-      openingspeech: function(){
-        return this.$store.getters.getExhibitionsByOpeningspeechId(this.$route.params.id);
-      },
-
-      openingspeechcv: function(){
-        const groups = groupBy(this.openingspeech, (d)=>new Date(d['openingDate']).getFullYear())
-        return [...groups.entries()].sort( (a, b)=>b-a );
-      },
-
-      bipartedGraphology: function(){
+      graph: function(){
         if(!this.$store.state.database)
           return new graphology.Graph();
 
         const sql = `
         SELECT DISTINCT A.artist_id AS a, A.exhibition_id AS b, B.artist_id AS c, C.exhibition_id AS d
-        FROM exhibitingOn A
-        JOIN exhibitingOn B ON B.exhibition_id==A.exhibition_id
-        JOIN exhibitingOn C ON C.artist_id==B.artist_id
+        FROM relations A
+        JOIN relations B ON B.exhibition_id==A.exhibition_id
+        JOIN relations C ON C.artist_id==B.artist_id
         WHERE A.artist_id==${this.$route.params.id}
         AND a!=c`
 
@@ -219,92 +178,16 @@
           .filter( (n)=>n[0]=='e' )
           .map((n)=>parseInt(n.slice(1)))
         );
-        console.log(exhibitions)
+
         for(let e of exhibitions){
-          console.log(e);
           G.setNodeAttribute('e'+e.id, 'label', e.title);
           G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
         }
+
+        // drop leaf nodes
+        G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
         return G;
       }
-
-      // bipartedGraphology: function(){
-      //   // create graph
-      //   let G = new graphology.MultiGraph();
-      //   let root = [this.artist]
-      //   let a = this.artist;
-      //   G.addNode("a"+a.id, {
-      //     label: a.name, 
-      //     color: 'hsl(155, 73%, 64%)'
-      //   })
-
-      //   // build network from sql
-      //   for(let edge of this.$store.getters.getRelations(a.id, null)){
-      //     if(!G.hasNode('e'+edge.exhibition_id)) // eg. exhibiting and curating eg.
-      //       G.addNode('e'+edge.exhibition_id)
-      //     G.addEdge('a'+edge.artist_id, 'e'+edge.exhibition_id, {
-      //       relation: edge.relation
-      //     });
-
-      //     for(let edge of this.$store.getters.getRelations(null, edge.exhibition_id)){
-      //       if(!G.hasNode('a'+edge.artist_id))
-      //         G.addNode('a'+edge.artist_id);
-
-      //       G.addEdge('a'+edge.artist_id, 'e'+edge.exhibition_id,{
-      //         relation: edge.relation
-      //       });
-      //     }
-      //   }
-
-      //   // populate artists names
-      //   let artists = this.$store.getters.getArtistsByIds(
-      //     G.nodes()
-      //     .filter( (n)=>n[0]=='a' )
-      //     .map((n)=>parseInt(n.slice(1)))
-      //   );
-      //   for(let a of artists){
-      //     G.setNodeAttribute('a'+a.id, 'label', a.name)
-      //   }
-
-
-      //   // populate exhibition titles
-      //   let titles = new Map(this.exhibitions.map( (e)=>[e.id, e.title] ));
-      //   for(let e of this.exhibitions){
-      //     G.setNodeAttribute('e'+e.id, 'label', e.title);
-      //     G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
-      //   }
-
-      //   // filter out none xhibitionss
-      //   // G = subGraph(G, G.nodes().filter( (n)=> n[0]=='a' || G.getNodeAttribute(n, 'isExhibition') ));
-
-      //   // calculate degree centrality
-      //   for(let n of G.nodes()){
-      //     G.setNodeAttribute(n, 'degree',  G.degree(n));
-      //   }
-
-      //   let sumDegree = 0;
-      //   for(let n of G.nodes()){
-      //     sumDegree+=G.getNodeAttribute(n, 'degree');
-      //   }
-
-      //   for(let n of G.nodes()){
-      //     let degree = G.degree(n)//G.getNodeAttribute(n, 'degree');
-      //     G.setNodeAttribute(n, 'degreeCentrality', degree/sumDegree);
-      //   }
-
-      //   // set node visual attributes
-      //   for(let n of G.nodes()){
-      //     let degreeCentrality = G.getNodeAttribute(n, 'degree');
-      //     let defaultSize = 10;
-      //     G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
-      //     G.setNodeAttribute(n, 'color', n[0]=='a' ? 'hsl(155, 73%, 64%)' : 'lightslategray')
-      //   }
-
-      //   // drop leaf nodes
-      //   // G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
-      //   //
-      //   return G;
-      // }
     }
   }
 </script>

@@ -1,6 +1,11 @@
+ul{
+	padding: 0 0em;
+	list-style: none;
+}
+
 ul.group{
   list-style: none;
-  padding-left: 1em;
+  /*padding-left: 1em;*/
   margin-bottom: 2em;
 }
 

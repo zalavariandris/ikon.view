@@ -5,17 +5,16 @@
       <h2>{{gallery.name}}</h2>
     </header>
     <section>
-        <ul>
-          <li v-for="group in groupedByDate">
+        <h3>Exhibitions</h3>
+        <ul class="group">
+          <li v-for="group in groupBy(exhibitions, (e)=>new Date(e.opening).getFullYear())">
             {{group[0]}}
             <ul>
               <li v-for='e in group[1]' 
-                  v-bind:key="e.id"
-                  v-bind:class="{notExhibition: !e.isExhibition}"
-              >
+                  v-bind:key="e.id">
                 <router-link :to="{name: 'exhibition', params: {id: e.id}}">
-                    <p>{{e.title}} <small>({{e.openingDate}})</small></p>
-                  </router-link>
+                  {{e.title}}
+                </router-link>
               </li>
             </ul>
           </li>
@@ -30,6 +29,9 @@
   export default {
     name: 'GalleryView',
     store,
+    methods: {
+      groupBy
+    },
     computed: {
       gallery: function(){
         return this.$store.getters.getGalleryById(this.$route.params.id);
@@ -37,11 +39,6 @@
       
       exhibitions: function(){
         return this.$store.getters.getExhibitionsByGalleryId(this.$route.params.id);
-      },
-
-      groupedByDate: function(){
-        const groups = groupBy(this.exhibitions, (d)=>new Date(d['openingDate']).getFullYear())
-        return [...groups.entries()].sort( (a, b)=>b-a );
       }
     }
   }

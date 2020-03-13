@@ -21,6 +21,7 @@ export default new Vuex.Store({
     
     SET_DATABASE(state, database){
       state.database = database;
+      window.database = database;
     }
   },
 
@@ -31,7 +32,7 @@ export default new Vuex.Store({
         locateFile: file => `./${file}`
       }).then((SQL)=>{
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', "./ikon_v003.db", true);
+        xhr.open('GET', "./ikon_v005.db", true);
         xhr.responseType = 'arraybuffer';
 
         xhr.onprogress = (e)=>{
@@ -57,6 +58,7 @@ export default new Vuex.Store({
   },
 
   getters:{
+    // Query Artists
     artistsCount: (state) => {
       if(!state.database)
         return NaN;
@@ -75,22 +77,22 @@ export default new Vuex.Store({
     },
 
     getArtistById: (state, getters) => (id) => {
-        if(state.database == undefined)
-          return {};
+      if(state.database == undefined)
+        return {};
 
-        let sql = `
-        SELECT id, name
-        FROM artists
-        WHERE id = ${id}
-        LIMIT 1;
-        `;
-        
-        let results = state.database.exec(sql);
-        let row = results[0].values[0]
-        return {
-          id: row[0],
-          name: row[1]
-        }
+      let sql = `
+      SELECT id, name
+      FROM artists
+      WHERE id = ${id}
+      LIMIT 1;
+      `;
+      
+      let results = state.database.exec(sql);
+      let row = results[0].values[0]
+      return {
+        id: row[0],
+        name: row[1]
+      }
     },
 
     getArtistsByIds: (state, getters) => (ids) => {
@@ -104,7 +106,6 @@ export default new Vuex.Store({
       `;
       
       let results = state.database.exec(sql);
-
       if(!results[0])
         return [];
       return results[0]['values'].map((row)=>{
@@ -123,8 +124,9 @@ export default new Vuex.Store({
       let sql = `
       SELECT a.id, a.name, COUNT(DISTINCT ae.exhibition_id) as No_exhibitions
       FROM artists a
-      INNER JOIN exhibitingOn ae ON ae.artist_id = a.id
+      INNER JOIN relations ae ON ae.artist_id = a.id
       WHERE a.name LIKE '%${name}%'
+      AND ae.relation='exhibiting'
       GROUP BY a.id 
       ORDER BY No_exhibitions DESC
       LIMIT ${limit} OFFSET ${page-1}*${limit};
@@ -165,8 +167,8 @@ export default new Vuex.Store({
         return [];
       
       const sql = `
-      SELECT DISTINCT a.id, a.name
-      FROM exhibitingOn ae
+      SELECT DISTINCT a.id, a.name, ae.relation
+      FROM relations ae
       INNER JOIN artists a ON a.id = ae.artist_id
       WHERE ae.exhibition_id = ${id}
       `;
@@ -178,7 +180,8 @@ export default new Vuex.Store({
       return results[0].values.map((row)=>{
         return {
           id: row[0],
-          name: row[1]
+          name: row[1],
+          relation: row[2]
         }
       });
     },
@@ -206,24 +209,73 @@ export default new Vuex.Store({
       });
     },
 
-    getGalleriesLikeNameCount: (state) => (name) => {
+    // Query Exhibitions
+    exhibitionsCount: (state) => {
       if(!state.database)
         return NaN
-
       let sql = `
       SELECT COUNT(ikonid)
-      FROM galleries
-      WHERE name LIKE '%${name}%'
-      `;
+      FROM exhibitions
+      `
 
       let results = state.database.exec(sql);
 
       if(!results[0])
-        return [];
+        return NaN
 
       return results[0].values[0][0]
     },
 
+    getExhibitionById: (state, getters) => (id) => {
+      if(state.database == undefined)
+        return null;
+
+      let sql = `
+      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
+      FROM exhibitions e
+      JOIN galleries g ON g.ikonid=e.gallery_id
+      WHERE e.ikonid = ${id}
+      LIMIT 1;
+      `;
+      
+      let results = state.database.exec(sql);
+      let row = results[0].values[0]
+      return {
+        id: row[0],
+        title: row[1],
+        openingDate: row[2],
+        closingDate: row[3],
+        gallery_id: row[4],
+        gallery: row[5],
+        description: row[6]
+      }
+    },
+
+
+    getExhibitionsByIds: (state, getters) => (ids) => {
+      if(state.database == undefined)
+        return null;
+
+      let sql = `
+      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
+      FROM exhibitions e
+      JOIN galleries g ON g.ikonid=e.gallery_id
+      WHERE e.ikonid IN (${ids})
+      `;
+      
+      let results = state.database.exec(sql);
+      return results[0].values.map( (row)=>{
+        return {
+          id: row[0],
+          title: row[1],
+          opening: row[2],
+          closing: row[3],
+          gallery_id: row[4],
+          gallery: row[5],
+          description: row[6]
+        }
+      });
+    },
 
     getExhibitionsLikeTitle: (state) => (title, limit, page) => {
       if(state.database == undefined)
@@ -231,11 +283,11 @@ export default new Vuex.Store({
 
       // query database
       let sql = `
-      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, e.isExhibition, g.ikonid, g.name
+      SELECT e.ikonid, e.title, e.opening, e.closing, e.isExhibition, g.ikonid, g.name
       FROM exhibitions e
       JOIN galleries g ON g.ikonid=e.gallery_id
       WHERE title LIKE '%${title}%'
-      ORDER BY e.openingDate DESC
+      ORDER BY e.opening DESC
       LIMIT ${limit} OFFSET ${page-1}*${limit};
       `;
 
@@ -244,12 +296,14 @@ export default new Vuex.Store({
       if(!results[0])
         return [];
 
+
+
       return results[0]['values'].map((row)=>{
         return {
           'id': row[0],
           'title': row[1],
-          'openingDate': new Date(row[2]).toLocaleDateString(),
-          'closingDate': isNaN(new Date(row[3])) ? "" : new Date(row[3]).toLocaleDateString(),
+          'opening': row[2],
+          'closing': row[3],
           'isExhibition': row[4],
           'gallery_id': row[5],
           'gallery': row[6]
@@ -275,22 +329,73 @@ export default new Vuex.Store({
         return results[0].values[0][0]
     },
 
-    exhibitionsCount: (state) => {
+    getExhibitionsByArtistId: (state, getters) => (id) => {
       if(!state.database)
-        return NaN
-      let sql = `
-      SELECT COUNT(ikonid)
-      FROM exhibitions
-      `
+          return [];
+      
+      const sql = `
+      SELECT DISTINCT e.ikonid, e.title, e.opening, e.isExhibition, ae.relation, e.gallery_id, g.name, metrics.artistsCount
+      FROM exhibitions e
+      JOIN relations ae ON e.ikonid = ae.exhibition_id
+      JOIN galleries g ON g.ikonid==e.gallery_id
+      JOIN (
+          SELECT e.ikonid, COUNT(ae.exhibition_id) AS artistsCount
+          FROM exhibitions e
+          LEFT OUTER JOIN relations ae ON e.ikonid = ae.exhibition_id
+          WHERE ae.relation == 'exhibiting'
+          GROUP BY e.ikonid
+          ) metrics ON metrics.ikonid == e.ikonid
+      WHERE ae.artist_id = ${id}
+      ORDER BY e.opening DESC;
+      `;
 
       let results = state.database.exec(sql);
-
       if(!results[0])
-        return NaN
+        return [];
 
-      return results[0].values[0][0]
+      return results[0].values.map((row)=>{
+        return {
+          id: row[0],
+          title: row[1],
+          opening: row[2],
+          isExhibition: row[3],
+          relation: row[4],
+          gallery_id: row[5],
+          gallery: row[6],
+          artistsCount: row[7]
+        }
+      });
     },
 
+    getExhibitionsByGalleryId: (state, getters) => (id) => {
+      if(!state.database)
+          return [];
+      
+      const sql = `
+      SELECT DISTINCT e.ikonid, e.title, e.opening, e.isExhibition, e.gallery_id, g.name
+      FROM exhibitions e
+      JOIN galleries g ON e.gallery_id==g.ikonid
+      WHERE gallery_id = ${id}
+      ORDER BY e.opening DESC;
+      `;
+
+      let results = state.database.exec(sql);
+      if(!results[0])
+        return [];
+
+      return results[0].values.map((row)=>{
+        return {
+          id: row[0],
+          title: row[1],
+          opening: row[2],
+          isExhibition: row[3],
+          gallery_id: row[4],
+          gallery: row[5]
+        }
+      });
+    },
+
+    // Query Galleries
     galleriesCount: (state) => {
       if(!state.database)
         return NaN
@@ -305,6 +410,25 @@ export default new Vuex.Store({
         return NaN
 
       return results[0].values[0][0]
+    },
+
+    getGalleryById: (state, getters) => (id) => {
+        if(state.database == undefined)
+          return {};
+
+        let sql = `
+        SELECT ikonid, name
+        FROM galleries
+        WHERE ikonid = ${id}
+        LIMIT 1;
+        `;
+        
+        let results = state.database.exec(sql);
+        let row = results[0].values[0]
+        return {
+          id: row[0],
+          name: row[1]
+        }
     },
 
     getGalleriesLikeName: (state) => (name, limit, page) => {
@@ -332,325 +456,25 @@ export default new Vuex.Store({
         });
     },
 
-    getExhibitionById: (state, getters) => (id) => {
-      if(state.database == undefined)
-        return null;
+    getGalleriesLikeNameCount: (state) => (name) => {
+      if(!state.database)
+        return NaN
 
       let sql = `
-      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, g.ikonid, g.name, e.description
-      FROM exhibitions e
-      JOIN galleries g ON g.ikonid=e.gallery_id
-      WHERE e.ikonid = ${id}
-      LIMIT 1;
-      `;
-      
-      let results = state.database.exec(sql);
-      let row = results[0].values[0]
-      return {
-        id: row[0],
-        title: row[1],
-        openingDate: row[2],
-        closingDate: row[3],
-        gallery_id: row[4],
-        gallery: row[5],
-        description: row[6]
-      }
-    },
-
-    getExhibitionsByIds: (state, getters) => (ids) => {
-      if(state.database == undefined)
-        return null;
-
-      let sql = `
-      SELECT e.ikonid, e.title, e.openingDate, e.closingDate, g.ikonid, g.name, e.description
-      FROM exhibitions e
-      JOIN galleries g ON g.ikonid=e.gallery_id
-      WHERE e.ikonid IN (${ids})
-      `;
-      
-      let results = state.database.exec(sql);
-      return results[0].values.map( (row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          closingDate: row[3],
-          gallery_id: row[4],
-          gallery: row[5],
-          description: row[6]
-        }
-      });
-    },
-
-    getGalleryById: (state, getters) => (id) => {
-        if(state.database == undefined)
-          return {};
-
-        let sql = `
-        SELECT ikonid, name
-        FROM galleries
-        WHERE ikonid = ${id}
-        LIMIT 1;
-        `;
-        
-        let results = state.database.exec(sql);
-        let row = results[0].values[0]
-        return {
-          id: row[0],
-          name: row[1]
-        }
-    },
-
-    getExhibitionsByArtistId: (state, getters) => (id) => {
-      if(!state.database)
-          return [];
-      
-      const sql = `
-      SELECT DISTINCT e.ikonid, e.title, e.openingDate, e.isExhibition
-      FROM exhibitions e
-      INNER JOIN exhibitingOn ae ON e.ikonid = ae.exhibition_id
-      WHERE ae.artist_id = ${id}
-      ORDER BY e.openingDate DESC;
+      SELECT COUNT(ikonid)
+      FROM galleries
+      WHERE name LIKE '%${name}%'
       `;
 
       let results = state.database.exec(sql);
+
       if(!results[0])
         return [];
 
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          isExhibition: row[3]
-        }
-      });
-    },
-
-    getExhibitionsByArtistIdWithArtistCount:(state, getters) => (id) => {
-      if(!state.database)
-          return [];
-
-      const sql = `
-      SELECT DISTINCT
-      e.ikonid,
-      e.title,
-      e.openingDate,
-      e.closingDate,
-      e.isExhibition,
-      metrics.artistsCount,
-      e.gallery_id,
-      g.name
-      FROM exhibitions e
-      INNER JOIN exhibitingOn ae ON e.ikonid==ae.exhibition_id
-      INNER JOIN artists a ON a.id==ae.artist_id
-      INNER JOIN galleries g ON g.ikonid == e.gallery_id
-      JOIN (
-          SELECT e.ikonid, COUNT(ae.exhibition_id) AS artistsCount
-          FROM EXHIBITIONS e
-          LEFT OUTER JOIN exhibitingOn ae ON e.ikonid = ae.exhibition_id
-          GROUP BY e.ikonid
-          ) metrics ON metrics.ikonid == e.ikonid
-      WHERE a.id = ${id}
-      ORDER BY e.openingDate DESC
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          closingDate: row[3],
-          isExhibition: row[4],
-          artistsCount: row[5],
-          gallery_id: row[6],
-          gallery: row[7]
-        }
-      });
-    },
-
-    getExhibitionsByCuratorId: (state, getters) => (id) => {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT e.ikonid, e.title, e.openingDate, e.isExhibition
-      FROM exhibitions e
-      INNER JOIN curatingThe ae ON e.ikonid = ae.exhibition_id
-      WHERE ae.artist_id = ${id}
-      ORDER BY e.openingDate DESC;
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          isExhibition: row[3]
-        }
-      });
-    },
-
-    getExhibitionsByOpeningspeechId: (state) => (id) => {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT e.ikonid, e.title, e.openingDate, e.isExhibition
-      FROM exhibitions e
-      INNER JOIN openingThe ae ON e.ikonid = ae.exhibition_id
-      WHERE ae.artist_id = ${id}
-      ORDER BY e.openingDate DESC;
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          isExhibition: row[3]
-        }
-      });
-    },
-
-    getCuratorsByExhibitionId: (state) => (id) => {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT a.id, a.name
-      FROM curatingThe ae
-      INNER JOIN artists a ON a.id = ae.artist_id
-      WHERE ae.exhibition_id = ${id}
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          name: row[1]
-        }
-      });
-    },
-
-    getOpeningspeechByExhibitionId: (state) => (id) => {
-      if(!state.database)
-        return [];
-      
-      const sql = `
-      SELECT DISTINCT a.id, a.name
-      FROM openingThe ae
-      INNER JOIN artists a ON a.id = ae.artist_id
-      WHERE ae.exhibition_id = ${id}
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          name: row[1]
-        }
-      });
-    },
-
-    getExhibitionsByGalleryId: (state) => (id) => {
-      if(!state.database)
-        return [];
-      
-      // query database
-      const sql = `
-      SELECT DISTINCT ikonid, title, openingDate, isExhibition
-      FROM exhibitions
-      WHERE gallery_id = ${id}
-      ORDER BY openingDate DESC;
-      `;
-
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          id: row[0],
-          title: row[1],
-          openingDate: row[2],
-          isExhibition: row[3]
-        }
-      });
+      return results[0].values[0][0]
     },
 
 
-    // Links
-    getRelations: (state) => (artist_id=undefined, exhibition_id=undefined) => {
-      if(!state.database)
-        return [];
-      // construct sql
-      let sql = "SELECT 'exhibiting' As Type, artist_id, exhibition_id FROM exhibitingOn\n"
-      if(artist_id && exhibition_id){
-        sql+= `WHERE artist_id==${artist_id}\n`;
-        sql+= `AND exhibition_id==${exhibition_id}\n`;
-      }else{
-        if(artist_id)
-          sql+= `WHERE artist_id==${artist_id}\n`;
-        if(exhibition_id)
-          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
-      }
-              
-      sql+="UNION\n";
-      
-      sql+= "SELECT 'opening' As Type, artist_id, exhibition_id FROM openingThe\n"
-      if(artist_id && exhibition_id){
-        sql+= `WHERE artist_id==${artist_id}\n`;
-        sql+= `AND exhibition_id==${exhibition_id}\n`;
-      }else{
-        if(artist_id)
-          sql+= `WHERE artist_id==${artist_id}\n`;
-        if(exhibition_id)
-          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
-      }
-              
-      sql+="UNION\n"
-      
-      sql+= "SELECT 'curating' As Type, artist_id, exhibition_id FROM curatingThe\n"
-      if(artist_id && exhibition_id){
-        sql+= `WHERE artist_id==${artist_id}\n`;
-        sql+= `AND exhibition_id==${exhibition_id}\n`;
-      }else{
-        if(artist_id)
-          sql+= `WHERE artist_id==${artist_id}\n`;
-        if(exhibition_id)
-          sql+= `WHERE exhibition_id==${exhibition_id}\n`;
-      }
 
-      let results = state.database.exec(sql);
-      if(!results[0])
-        return [];
-
-      return results[0].values.map((row)=>{
-        return {
-          relation: row[0],
-          artist_id: row[1],
-          exhibition_id: row[2]
-        }
-      });
-    }
   }
 })
