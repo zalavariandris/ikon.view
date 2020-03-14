@@ -82,12 +82,42 @@
         .force('collision', d3.forceCollide().radius((d)=> {
           return this.graph.getNodeAttribute(d.id, 'size');
         }))
-        .velocityDecay(0.90)
+        .velocityDecay(0.660)
         .on("tick", ()=>{
           // update svg elements
-          this.updateNodes();
-          this.updateLinks();
-          this.updateLabels();
+
+          this.viewport
+          .select('.nodes')
+          .selectAll('.node')
+          .attr('cx', (d)=>d.x)
+          .attr('cy', (d)=>d.y);
+
+          this.viewport
+          .select('.links')
+          .selectAll('.link')
+          .attr('d', function(d){
+            // Total difference in x and y from source to target
+            let diffX = d.target.x - d.source.x;
+            let diffY = d.target.y - d.source.y;
+
+            // Length of path from center of source node to center of target node
+            let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+            // x and y distances from center to outside edge of target node
+            let keepDistance = 10;
+            let targetOffsetX = (diffX * (d.target.r+keepDistance)) / (pathLength);
+            let targetOffsetY = (diffY * (d.target.r+keepDistance)) / (pathLength);
+            let sourceOffsetX = (diffX * (d.source.r+keepDistance)) / (pathLength);
+            let sourceOffsetY = (diffY * (d.source.r+keepDistance)) / (pathLength);
+
+            return "M" + (d.source.x+sourceOffsetX) + "," + (d.source.y+sourceOffsetY) + 
+                   "L" + (d.target.x-targetOffsetX) + "," + (d.target.y-targetOffsetY);
+          });
+
+          this.viewport.select('.labels')
+          .selectAll('text')
+          .attr('x', (d)=>d.x)
+          .attr('y', (d)=>d.y);
 
           // zoom to fit content
           this.fit();
@@ -127,18 +157,21 @@
         .selectAll('.node')
         .data(this.simgraph.nodes, (d)=>d)
 
-        let showDetails = (d, i)=>{
-          let subnodes = this.graph.neighbors(d.id).concat([d.id]);
-          let H = subGraph(this.graph, subnodes);
-
+        let showDetails = (r, i)=>{
           this.viewport.classed('nodes-highlighted', true)
 
-          d3.selectAll('.node')
-          .filter( (d)=>H.hasNode(d.id))
+          let subnodes = this.graph.neighbors(r.id).concat([r.id]);
+          let H = subGraph(this.graph, subnodes);
+          
+          this.viewport.selectAll('.node')
+          .classed('highlighted', false)
+          .filter( (n)=>H.hasNode(n.id))
           .classed('highlighted', true)
 
-          d3.selectAll('.link')
-          .filter( (d)=>H.hasNode(d.source.id) && H.hasNode(d.target.id))
+          this.viewport.select('.links')
+          .selectAll('.link')
+          .classed('highlighted', false)
+          .filter( (e)=>H.hasEdge(e.source.id, e.target.id) )
           .classed('highlighted', true)
         }
 
@@ -226,7 +259,7 @@
           if(isShort)
             return label
           else
-            return label.substring(0, 18)+"..."
+            return label.substring(0, 18)+'\u2026'
         })
         .attr("text-anchor", "middle")
         .attr('alignment-baseline', 'middle')
@@ -292,7 +325,7 @@
   }
 
   .node.exhibition{
-    fill: hsl(48, 88%, 60%);
+    fill: hsl(45, 100%, 69%);
   }
 
   .node.highlighted{
@@ -304,19 +337,23 @@
   }
 
   .viewport.nodes-highlighted .node.exhibition:not(.highlighted){
-    fill: hsl(48, 88%, 90%);
+    fill: hsl(48, 78%, 90%);
   }
 
   .link{
     stroke: hsl(60, 18%, 87%);
     stroke-width: 10px;
-    transition: stroke 0.3s;
-    transition: stroke-width 0.3s;
+    transition: stroke-width, stroke 0.7s;
   }
 
   .link.highlighted{
-    stroke: hsl(60, 18%, 80%);
+    stroke: hsl(60, 18%, 50%);
     stroke-width: 15px;
+  }
+  
+  .viewport.nodes-highlighted .link:not(.highlighted){
+    stroke: hsl(60, 18%, 90%);
+    stroke-width: 6px;
   }
 
   text{
