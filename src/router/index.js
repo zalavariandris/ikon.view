@@ -26,7 +26,7 @@ const routes = [
   { name: 'artist',      path: '/artists/:id',     component: ArtistView,
     children: [{
       name: 'artist.bio',
-      path: 'bio',
+      path: '/',
       component: ArtistBio
     },
     {
