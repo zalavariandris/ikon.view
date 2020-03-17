@@ -76,80 +76,80 @@
                             G.addEdge('a'+path[2], 'e'+path[3])
                     }
 
-        // calculate degree centrality
-        for(let n of G.nodes()){
-            G.setNodeAttribute(n, 'degree',  G.degree(n));
-        }
+                // calculate degree centrality
+                for(let n of G.nodes()){
+                    G.setNodeAttribute(n, 'degree',  G.degree(n));
+                }
 
-        let sumDegree = 0;
-        for(let n of G.nodes()){
-            sumDegree+=G.getNodeAttribute(n, 'degree');
-        }
+                let sumDegree = 0;
+                for(let n of G.nodes()){
+                    sumDegree+=G.getNodeAttribute(n, 'degree');
+                }
 
-        for(let n of G.nodes()){
-          let degree = G.degree(n)//G.getNodeAttribute(n, 'degree');
-          G.setNodeAttribute(n, 'degreeCentrality', degree/sumDegree);
-      }
+                for(let n of G.nodes()){
+                  let degree = G.degree(n)//G.getNodeAttribute(n, 'degree');
+                  G.setNodeAttribute(n, 'degreeCentrality', degree/sumDegree);
+              }
 
-        // set node visual attributes
-        for(let n of G.nodes()){
-            let degreeCentrality = G.getNodeAttribute(n, 'degree');
-            let defaultSize = 10;
-            G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
-        }
-        
-        G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
+                // set node visual attributes
+                for(let n of G.nodes()){
+                    let degreeCentrality = G.getNodeAttribute(n, 'degree');
+                    let defaultSize = 10;
+                    G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
+                }
+                
+                G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
 
-        // populate artists names
-        let artists = this.$store.getters.getArtistsByIds(
-            G.nodes()
-            .filter( (n)=>n[0]=='a' )
-            .map((n)=>parseInt(n.slice(1)))
-            );
-        for(let a of artists){
-            G.setNodeAttribute('a'+a.id, 'label', a.name)
-        }
+                // populate artists names
+                let artists = this.$store.getters.getArtistsByIds(
+                    G.nodes()
+                    .filter( (n)=>n[0]=='a' )
+                    .map((n)=>parseInt(n.slice(1)))
+                    );
+                for(let a of artists){
+                    G.setNodeAttribute('a'+a.id, 'label', a.name)
+                }
 
 
-        // populate exhibition titles
-        let exhibitions = this.$store.getters.getExhibitionsByIds(
-            G.nodes()
-            .filter( (n)=>n[0]=='e' )
-            .map((n)=>parseInt(n.slice(1)))
-            );
+                // populate exhibition titles
+                let exhibitions = this.$store.getters.getExhibitionsByIds(
+                    G.nodes()
+                    .filter( (n)=>n[0]=='e' )
+                    .map((n)=>parseInt(n.slice(1)))
+                    );
 
-        for(let e of exhibitions){
-            G.setNodeAttribute('e'+e.id, 'label', e.title);
-            G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
-        }
+                for(let e of exhibitions){
+                    G.setNodeAttribute('e'+e.id, 'label', e.title);
+                    G.setNodeAttribute('e'+e.id, 'isExhibition', e.isExhibition);
+                }
 
-        // drop leaf nodes
-        G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
-        return G;
-    },
+                // drop leaf nodes
+                G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );
+                return G;
+            },
 
-    plot: function(){
-        let plot = this.exhibiting.map( (d)=>{
-            return {
-                x: new Date(d.opening),
-                y: d.exhibition_count,
-                label: d.gallery,
-                tooltip: d.title+'\n'+d.gallery+'\n'+new Date(d.opening).toLocaleDateString(),
-                color: d.artistCount==1 ? 'pink' : 'lightsteelblue'
+            plot: function(){
+                let plot = this.exhibiting.map( (d)=>{
+                    return {
+                        x: new Date(d.opening),
+                        y: d.exhibition_count,
+                        label: d.gallery,
+                        tooltip: d.title+'\n'+d.gallery+'\n'+new Date(d.opening).toLocaleDateString(),
+                        color: d.artistCount==1 ? 'pink' : 'lightsteelblue'
+                    }
+                });
+
+                plot.sort( (a, b)=>a.x-b.x );
+                return plot;
+            },
+
+            legend: function(){
+                return {
+                    solo: 'pink',
+                    group: 'lightsteelblue'
+                }
             }
-        });
-
-        plot.sort( (a, b)=>a.x-b.x );
-        return plot;
-    },
-
-    legend: function(){
-        return {
-            solo: 'pink',
-            group: 'lightsteelblue'
         }
-    }
-}
 }
 </script>
 

@@ -343,7 +343,7 @@
   .link{
     stroke: hsl(60, 18%, 87%);
     stroke-width: 10px;
-    transition: stroke-width, stroke 0.7s;
+    transition: stroke-width 0.7s, stroke 0.7s;
   }
 
   .link.highlighted{

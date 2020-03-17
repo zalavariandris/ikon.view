@@ -9,13 +9,13 @@
                 <line class="domain"
                 :x1="margin.left"
                 :x2="width-margin.right"
-                :y1="yscale(0)"
-                :y2="yscale(0)"
+                :y1="yscale.range()[0]"
+                :y2="yscale.range()[0]"
                 ></line>
 
                 <g v-for="(tick, i) in xticks" 
                 class="tick"
-                :style="{ transform: `translate(${xscale(tick)}px, ${yscale(0)}px)`}"
+                :style="{ transform: `translate(${xscale(tick)}px, ${yscale.range()[0]}px)`}"
                 :key="i">
                     <line y2="6"></line>
                     <text x="-0.8em" y="1.3em">{{tick.getFullYear()}}</text>
@@ -46,7 +46,7 @@
                 <line 
                     :x1="xscale(d.x)" 
                     :x2="xscale(d.x)" 
-                    :y1="yscale(0)"
+                    :y1="yscale.range()[0]"
                     :y2="yscale(d.y)"
                 ></line>
 
@@ -98,7 +98,7 @@ export default{
         // });
     },
 
-    props: ['plot', 'legend'],
+    props: ['plot', 'legend', 'xlim', 'ylim'],
 
     data: function(){
         return {
@@ -121,11 +121,6 @@ export default{
         hideTooltip: function(){
             let tooltip = this.$refs.tooltip;
             tooltip.style.visibility= 'hidden';
-        },
-
-
-        isLocalMaximum: function(d, i){
-            return this.peaks[i];
         }
     },
 
