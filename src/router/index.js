@@ -7,19 +7,35 @@ import ExhibitionListView from '../views/ExhibitionListView.vue'
 import ArtistListView from '../views/ArtistListView.vue'
 import GalleryListView from '../views/GalleryListView.vue'
 
-import ExhibitionView from '../views/ExhibitionView.vue'
+
 import ArtistView from '../views/ArtistView.vue'
+import ArtistStats from '../views/ArtistStats.vue'
+import ArtistBio from '../views/ArtistBio.vue'
+
+import ExhibitionView from '../views/ExhibitionView.vue'
 import GalleryView from '../views/GalleryView.vue'
 
 Vue.use(VueRouter)
 const routes = [
   { name: 'home',        path: '/', component: LandingPageView},
   { name: 'exhibitions', path: '/exhibitions',     component: ExhibitionListView },
-  { name: 'artists',     path: '/artists',         component: ArtistListView },
+  { name: 'artists',     path: '/artists',         component: ArtistListView},
   { name: 'galleries',	 path: '/galleries',       component: GalleryListView },
 
   { name: 'exhibition',  path: '/exhibitions/:id', component: ExhibitionView},
-  { name: 'artist',      path: '/artists/:id',     component: ArtistView},
+  { name: 'artist',      path: '/artists/:id',     component: ArtistView,
+    children: [{
+      name: 'artist.bio',
+      path: 'bio',
+      component: ArtistBio
+    },
+    {
+      name: 'artist.stats',
+      path: 'stats',
+      component: ArtistStats
+
+    }]
+  },
   { name: 'gallery',     path: '/galleries/:id',   component: GalleryView},
 ]
 const router = new VueRouter({

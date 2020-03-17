@@ -25,7 +25,8 @@
         <label for="db">loading data...</label>
         <progress id="db" v-bind:value="loadingProgress*100" max="100">{{loadingProgress*100}}%</progress>
       </div>
-      <router-view v-else></router-view>
+      <router-view v-if="
+      ready"></router-view>
     </main>
     <footer>
     </footer>
@@ -64,6 +65,9 @@ export default {
   },
 
   computed: {
+    ready: function(){
+      return this.$store.state.database ? true : false;
+    },
     loadingStatus: function(){
       return this.$store.state.loadingStatus;
     },

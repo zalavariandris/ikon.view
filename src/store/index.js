@@ -59,9 +59,8 @@ export default new Vuex.Store({
 
   getters:{
     // Query Artists
-    artistsCount: (state) => {
-      if(!state.database)
-        return NaN;
+    artistsCount: (state, getters) => {
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT COUNT(id)
@@ -77,8 +76,7 @@ export default new Vuex.Store({
     },
 
     getArtistById: (state, getters) => (id) => {
-      if(state.database == undefined)
-        return {};
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT id, name
@@ -96,8 +94,7 @@ export default new Vuex.Store({
     },
 
     getArtistsByIds: (state, getters) => (ids) => {
-      if(state.database == undefined)
-        return [];
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT id, name
@@ -117,8 +114,7 @@ export default new Vuex.Store({
     },
 
     getArtistsLikeName: (state) => (name, limit, page) => {
-      if(state.database == undefined)
-        return []
+      console.assert(state.database!=null)
 
       // query database
       let sql = `
@@ -145,8 +141,7 @@ export default new Vuex.Store({
     },
 
     getArtistsLikeNameCount: (state) => (name) => {
-      if(!state.database)
-        return NaN;
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT COUNT(id)
@@ -163,8 +158,7 @@ export default new Vuex.Store({
     },
 
     getArtistsByExhibitionId: (state) => (id) => {
-      if(!state.database)
-        return [];
+      console.assert(state.database!=null)
       
       const sql = `
       SELECT DISTINCT a.id, a.name, ae.relation
@@ -187,8 +181,7 @@ export default new Vuex.Store({
     },
 
     getArtistsByExhibitionIds: (state, getters) => (ids)=> {
-      if(!state.database)
-        return [];
+      console.assert(state.database!=null)
       
       const sql = `
       SELECT DISTINCT a.id, a.name
@@ -211,8 +204,8 @@ export default new Vuex.Store({
 
     // Query Exhibitions
     exhibitionsCount: (state) => {
-      if(!state.database)
-        return NaN
+      console.assert(state.database!=null)
+
       let sql = `
       SELECT COUNT(ikonid)
       FROM exhibitions
@@ -227,8 +220,7 @@ export default new Vuex.Store({
     },
 
     getExhibitionById: (state, getters) => (id) => {
-      if(state.database == undefined)
-        return null;
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
@@ -253,8 +245,7 @@ export default new Vuex.Store({
 
 
     getExhibitionsByIds: (state, getters) => (ids) => {
-      if(state.database == undefined)
-        return null;
+      console.assert(state.database!=null)
 
       let sql = `
       SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
@@ -278,8 +269,7 @@ export default new Vuex.Store({
     },
 
     getExhibitionsLikeTitle: (state) => (title, limit, page) => {
-      if(state.database == undefined)
-        return []
+      console.assert(state.database!=null)
 
       // query database
       let sql = `
@@ -312,8 +302,7 @@ export default new Vuex.Store({
     },
 
     getExhibitionsLikeTitleCount: (state) => (title) => {
-        if(!state.database)
-          return NaN
+        console.assert(state.database!=null)
 
         let sql = `
         SELECT COUNT(ikonid)
@@ -330,21 +319,26 @@ export default new Vuex.Store({
     },
 
     getExhibitionsByArtistId: (state, getters) => (id) => {
-      if(!state.database)
-          return [];
+      console.assert(state.database!=null)
       
       const sql = `
-      SELECT DISTINCT e.ikonid, e.title, e.opening, e.isExhibition, ae.relation, e.gallery_id, g.name, metrics.artistsCount
+      SELECT DISTINCT e.ikonid, e.title, e.opening, e.isExhibition, ae.relation, em.artistsCount, e.gallery_id, g.name, gm.exhibition_count
       FROM exhibitions e
       JOIN relations ae ON e.ikonid = ae.exhibition_id
       JOIN galleries g ON g.ikonid==e.gallery_id
       JOIN (
-          SELECT e.ikonid, COUNT(ae.exhibition_id) AS artistsCount
-          FROM exhibitions e
-          LEFT OUTER JOIN relations ae ON e.ikonid = ae.exhibition_id
-          WHERE ae.relation == 'exhibiting'
-          GROUP BY e.ikonid
-          ) metrics ON metrics.ikonid == e.ikonid
+        SELECT e.ikonid, COUNT(ae.exhibition_id) AS artistsCount
+        FROM exhibitions e
+        LEFT OUTER JOIN relations ae ON e.ikonid = ae.exhibition_id
+        WHERE ae.relation == 'exhibiting'
+        GROUP BY e.ikonid
+      ) em ON em.ikonid == e.ikonid
+      JOIN (
+          SELECT g.ikonid, g.name, COUNT(e.ikonid) as exhibition_count
+          FROM galleries g
+          LEFT JOIN exhibitions e ON e.gallery_id==g.ikonid
+          GROUP BY g.ikonid
+      ) gm ON gm.ikonid==e.gallery_id
       WHERE ae.artist_id = ${id}
       ORDER BY e.opening DESC;
       `;
@@ -360,16 +354,16 @@ export default new Vuex.Store({
           opening: row[2],
           isExhibition: row[3],
           relation: row[4],
-          gallery_id: row[5],
-          gallery: row[6],
-          artistsCount: row[7]
+          artistCount: row[5],
+          gallery_id: row[6],
+          gallery: row[7],
+          exhibition_count: row[8]
         }
       });
     },
 
     getExhibitionsByGalleryId: (state, getters) => (id) => {
-      if(!state.database)
-          return [];
+      console.assert(state.database!=null)
       
       const sql = `
       SELECT DISTINCT e.ikonid, e.title, e.opening, e.isExhibition, e.gallery_id, g.name
@@ -397,8 +391,8 @@ export default new Vuex.Store({
 
     // Query Galleries
     galleriesCount: (state) => {
-      if(!state.database)
-        return NaN
+      console.assert(state.database!=null)
+
       let sql = `
       SELECT COUNT(ikonid)
       FROM galleries

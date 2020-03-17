@@ -49,7 +49,7 @@
 
     watch: {
       graph: function(){
-        console.log('chaged');
+        console.log('changed');
         this.updateSimulation();
         this.updateNodes();
         this.updateLinks();

@@ -77,6 +77,14 @@ a:hover{
   text-decoration: underline;
 }
 
+a.router-link-exact-active{
+  text-decoration: underline;
+}
+
+h1 a.router-link-active{
+  text-decoration: inherit;
+}
+
 .notExhibition{
   opacity: 0.5;
 }
