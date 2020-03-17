@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import LandingPageView from '../views/LandingPageView.vue'
+import HomeView from '../views/HomeView.vue'
 
 import ExhibitionListView from '../views/ExhibitionListView.vue'
 import ArtistListView from '../views/ArtistListView.vue'
@@ -17,7 +17,7 @@ import GalleryView from '../views/GalleryView.vue'
 
 Vue.use(VueRouter)
 const routes = [
-  { name: 'home',        path: '/', component: LandingPageView},
+  { name: 'home',        path: '/', component: HomeView},
   { name: 'exhibitions', path: '/exhibitions',     component: ExhibitionListView },
   { name: 'artists',     path: '/artists',         component: ArtistListView},
   { name: 'galleries',	 path: '/galleries',       component: GalleryListView },

@@ -1,5 +1,5 @@
 <template>
-  <div class="LandingPageView">
+  <div class="HomeView">
     <ul>
       <li>
         <router-link to="/artists">
@@ -32,7 +32,7 @@
 <script>
   import store from '../store';
   export default {
-    name: 'LandingPageView',
+    name: 'HomeView',
     store,
     computed: {
       artistsCount: function(){
@@ -55,14 +55,14 @@ body.home{
 body.home nav{
   display: none;
 }
-.LandingPageView{
+.HomeView{
   height: 100%;
   display: flex;
   flex-direction: row;
   /*align-items: center;*/
   justify-content: space-between;
 }
-.LandingPageView ul{
+.HomeView ul{
   margin: 5% 0;
   height: 60%;
   display: flex;
@@ -72,13 +72,13 @@ body.home nav{
   /*text-align: center;*/
   padding: 0;
 }
-.LandingPageView li{
+.HomeView li{
   /*flex-basis: 100%;*/
   font-size: 150%;
   padding: 0;
   margin: 0.7em 0em;
 }
-.LandingPageView li small{
+.HomeView li small{
   display: block;
   font-size: 10px;
 }
