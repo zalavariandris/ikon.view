@@ -1,7 +1,7 @@
 <template>
   <div v-if="exhibition" class="ExhibitionView">
     <header>
-      <h1>Exhibition</h1>
+      <!-- <h1>Exhibition</h1> -->
       <h2>{{exhibition.title}}</h2>
       <p>
         {{exhibition.opening}}

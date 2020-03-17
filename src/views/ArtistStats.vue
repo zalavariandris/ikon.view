@@ -1,12 +1,12 @@
 <template>
     <div>
-        <h2>Statistics</h2>
+        <!-- <h2>Statistics</h2> -->
         <section>
-            <h3>Timeline</h3>
+            <!-- <h3>Timeline</h3> -->
             <vtimeline :plot="plot" :legend="legend"></vtimeline>
         </section>
         <section>
-            <h3>Ego network</h3>
+            <!-- <h3>Ego network</h3> -->
             <figure>
                 <d3graphology :graph="graph"></d3graphology>
                     <figcaption class='stats'>
@@ -162,5 +162,9 @@
 
   figure{
     margin: 0;
+  }
+
+  section{
+    margin-bottom: 3em;
   }
 </style>

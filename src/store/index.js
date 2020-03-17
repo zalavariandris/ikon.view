@@ -7,7 +7,8 @@ export default new Vuex.Store({
   state: {
     loadingStatus: "notLoading",
     loadingProgress: 0,
-    database: null
+    database: null,
+    error_msg: ""
   },
 
   mutations: {
@@ -22,6 +23,10 @@ export default new Vuex.Store({
     SET_DATABASE(state, database){
       state.database = database;
       window.database = database;
+    },
+
+    SET_ERROR_MSG(state, msg){
+      state.error_msg = msg;
     }
   },
 
@@ -48,7 +53,8 @@ export default new Vuex.Store({
         };
 
         xhr.onerror = ()=>{
-          console.log("ERROR loading database:", xhr.statusText);
+          alert("ERROR loading database:", xhr.statusText);
+          context.commit('SET_ERROR_MSG', xhr.statusText);
         }
 
         xhr.send();
@@ -434,7 +440,8 @@ export default new Vuex.Store({
         SELECT ikonid, name
         FROM galleries
         WHERE name LIKE '%${name}%'
-        LIMIT ${limit} OFFSET ${page-1}*${limit};
+        ORDER BY name
+        LIMIT ${limit} OFFSET ${page-1}*${limit}
         `;
 
         let results = state.database.exec(sql);

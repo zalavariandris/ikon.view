@@ -1,6 +1,6 @@
 <template>
 	<div class="CV">
-        <h2>CV</h2>
+        <!-- <h2>CV</h2> -->
         <section v-for="section in cv">
           <h3>{{section[0]}}</h3>
           <ul class=group>

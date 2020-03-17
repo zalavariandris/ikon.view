@@ -3,15 +3,13 @@
     <h2>Artists
     <small>({{count}})</small>
     </h2>
-
-    <input v-model="search" placeholder="filter">
     <vpaginate 
       v-model="page"
       :count="Math.ceil(resultsCount/limit)">
     </vpaginate>
     <table>
       <thead>
-        <td>name</td>
+        <td><input v-model="search" placeholder="search name"></td>
         <td width='70px'>exhibitions</td>
       </thead>
       <tbody>

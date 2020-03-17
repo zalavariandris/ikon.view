@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div id='error' v-if="error_msg">
+      {{error_msg}}
+    </div>
     <header>
         <h1>
           <router-link to="/">
@@ -61,7 +64,12 @@ export default {
   },
 
   mounted: function(){
-    this.$store.dispatch('fetchDatabase');
+    try{
+      this.$store.dispatch('fetchDatabase');
+    }
+    catch(err) {
+      this.$store.state.error_msg = err.message;
+    }
   },
 
   computed: {
@@ -73,6 +81,9 @@ export default {
     },
     loadingProgress: function(){
       return this.$store.state.loadingProgress;
+    },
+    error_msg: function(){
+      return this.$store.state.error_msg;
     }
   }
 }

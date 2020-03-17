@@ -1,7 +1,7 @@
 <template>
   <div v-if="gallery" class="GalleryView">
     <header>
-      <h1>Gallery</h1>
+      <!-- <h1>Gallery</h1> -->
       <h2>{{gallery.name}}</h2>
     </header>
     <section>

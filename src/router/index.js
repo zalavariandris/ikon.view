@@ -23,9 +23,9 @@ const routes = [
   { name: 'galleries',	 path: '/galleries',       component: GalleryListView },
 
   { name: 'exhibition',  path: '/exhibitions/:id', component: ExhibitionView},
-  { name: 'artist',      path: '/artists/:id',     component: ArtistView,
+  { path: '/artists/:id',     component: ArtistView,
     children: [{
-      name: 'artist.bio',
+      name: 'artist',
       path: '/',
       component: ArtistBio
     },

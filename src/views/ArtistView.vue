@@ -1,12 +1,12 @@
 <template>
   <div v-if="artist" class="ArtistView">
     <header>
-      <h1>Artist</h1>
+      <!-- <h1>Artist</h1> -->
       <h2>{{artist.name}}</h2>
       <nav>
         <ul>
           <li>
-            <router-link :to="{name: 'artist.bio', params: {id: artist.id}}">
+            <router-link :to="{name: 'artist', params: {id: artist.id}}">
               bio
             </router-link>
           </li>
