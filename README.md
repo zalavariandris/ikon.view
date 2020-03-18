@@ -3,18 +3,6 @@
 ## Demo
 https://zalavariandris.github.io/ikon.view/
 
-## Deploy to gh-pages
-https://medium.com/@Roli_Dori/deploy-vue-cli-3-project-to-github-pages-ebeda0705fbd
-- add remote from github
-- create gh-pages branch
-```
-npm run build
-// comment out dist/ in .gitignore. dont commit to master branch
-git add dist && git commit -m "dist subtree commit"
-git subtree push --prefix dist origin gh-pages
-// uncomment dist folder in .gitignore
-```
-
 ## TODOS
 - [x] Landing page
   - [ ] unified search with levenshtein distance
@@ -64,3 +52,15 @@ git subtree push --prefix dist origin gh-pages
 
 - [ ] express api server
 - [ ] editing
+
+## Deploy to gh-pages
+https://medium.com/@Roli_Dori/deploy-vue-cli-3-project-to-github-pages-ebeda0705fbd
+- add remote from github
+- create gh-pages branch
+```
+npm run build
+// comment out dist/ in .gitignore. dont commit to master branch
+git add dist && git commit -m "dist subtree commit"
+git subtree push --prefix dist origin gh-pages
+// uncomment dist folder in .gitignore
+```
