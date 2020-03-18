@@ -7,11 +7,13 @@
     <section>
         <h3>Exhibitions</h3>
         <ul class="group">
-          <li v-for="group in groupBy(exhibitions, (e)=>new Date(e.opening).getFullYear())">
+          <li
+          v-for="group in groupBy(exhibitions, (e)=>new Date(e.opening).getFullYear())"
+          :key="group[0]">
             {{group[0]}}
             <ul>
               <li v-for='e in group[1]' 
-                  v-bind:key="e.id">
+                  :key="e.id">
                 <router-link :to="{name: 'exhibition', params: {id: e.id}}">
                   {{e.title}}
                 </router-link>

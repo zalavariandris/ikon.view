@@ -20,7 +20,6 @@
       </p>
     </header>
     <section class='info'>
-
       <section v-if="artists.length>0">
         <h3>Artist<template v-if="artists.length>1">s</template></h3>
         <ul>

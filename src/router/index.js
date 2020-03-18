@@ -9,8 +9,8 @@ import GalleryListView from '../views/GalleryListView.vue'
 
 
 import ArtistView from '../views/ArtistView.vue'
-import ArtistStats from '../views/ArtistStats.vue'
-import ArtistBio from '../views/ArtistBio.vue'
+import ArtistStats from '../components/ArtistStats.vue'
+import ArtistBio from '../components/ArtistBio.vue'
 
 import ExhibitionView from '../views/ExhibitionView.vue'
 import GalleryView from '../views/GalleryView.vue'

@@ -13,9 +13,9 @@
       <tbody>
         <tr v-for='g in galleries' v-bind:key="g.id">
           <td>
-          	<router-link :to="{name: 'gallery', params: {id: g.id}}">
-            	{{g.name}}
-        	 </router-link>
+            <router-link :to="{name: 'gallery', params: {id: g.id}}">
+              {{g.name}}
+           </router-link>
           </td>
         </tr>
       </tbody>

@@ -3,7 +3,7 @@
         <!-- <h2>Statistics</h2> -->
         <section>
             <!-- <h3>Timeline</h3> -->
-            <vtimeline :plot="plot" :legend="legend"></vtimeline>
+            <careertrajectory :plot="plot" :legend="legend"></careertrajectory>
         </section>
         <section>
             <!-- <h3>Ego network</h3> -->
@@ -22,11 +22,11 @@
     import graphology from 'graphology';
     import subGraph from 'graphology-utils/subgraph';
     import d3graphology from '../components/d3graphology.vue';
-    import vtimeline from '../components/vtimeline.vue';
+    import careertrajectory from '../components/careertrajectory.vue';
 
     export default {
         name: 'ArtistStats',
-        components:{vtimeline, d3graphology},
+        components:{careertrajectory, d3graphology},
 
         computed:{
             exhibitions: function(){
@@ -95,7 +95,7 @@
                 for(let n of G.nodes()){
                     let degreeCentrality = G.getNodeAttribute(n, 'degree');
                     let defaultSize = 10;
-                    G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : 100);
+                    G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : defaultSize);
                 }
                 
                 G = subGraph(G, G.nodes().filter( (n)=> G.degree(n)>1) );

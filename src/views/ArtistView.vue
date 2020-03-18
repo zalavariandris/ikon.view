@@ -27,15 +27,9 @@
 
 <script>
   import store from '../store';
-  import ArtistStats from './ArtistStats.vue'
-  import ArtistBio from './ArtistBio.vue'
 
   export default {
     name: 'ArtistView',
-    components: {
-      ArtistStats,
-      ArtistBio
-    },
     store,
     computed: {
       artist: function(){

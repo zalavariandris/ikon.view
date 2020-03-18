@@ -26,7 +26,7 @@ export default new Vuex.Store({
     },
 
     SET_ERROR_MSG(state, msg){
-      state.error_msg = msg;
+    	state.error_msg = msg;
     }
   },
 

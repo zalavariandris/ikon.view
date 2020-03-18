@@ -34,42 +34,53 @@
         </g>
 
         <g class="plot">
-            <g>
+            <g class="line">
                 <polyline :points="vertices"/>
             </g>
-            <g class="bar"
-               v-for="(d, i) in plot"
-               :key="i"
-               @mouseover="showTooltip(d)"
-               @mouseleave="hideTooltip(d)">
-
+            <g class="stem">
                 <line 
+                    v-for="(d, i) in plot"
+                    :key="i"
+                    @mouseover="showTooltip(d)"
+                    @mouseleave="hideTooltip(d)"
                     :x1="xscale(d.x)" 
                     :x2="xscale(d.x)" 
                     :y1="yscale.range()[0]"
                     :y2="yscale(d.y)"
-                ></line>
-
+                    ></line>
+            </g>
+            <g class="scatter">
                 <circle
+                    v-for="(d, i) in plot"
+                    :key="i"
+                    @mouseover="showTooltip(d)"
+                    @mouseleave="hideTooltip(d)"
                     :cx="xscale(d.x)"
                     :cy="yscale(d.y)"
                     :fill="d.color"
                 ></circle>
-
-                <text v-show="peaks[i]"
+            </g>
+            <g class="annotations">
+                <text 
+                    v-for="(d, i) in plot"
+                    :key="i"
+                    v-show="peaks[i]"
+                    @mouseover="showTooltip(d)"
+                    @mouseleave="hideTooltip(d)"
                     :x="xscale(d.x)" 
                     :y="yscale(d.y)">
                     {{d.label}}
                 </text>
             </g>
+        </g>
 
-            <g v-if="legend" 
-               class="legend" style="transform: translate(47px, 15px);">
-                <g v-for="(color, name, i) in legend"
-                   :style="'transform: translate(0,'+i+'em);'">>>
-                    <circle :fill="color" r=5></circle>
-                    <text x=6 dominant-baseline='middle'>{{name}}</text>
-                </g>
+        <g class="legend" v-if="legend" 
+            style="transform: translate(47px, 15px);">
+            <g v-for="(color, name, i) in legend"
+               :key="i"
+               :style="'transform: translate(0,'+i+'em);'">>>
+                <circle :fill="color" r=5></circle>
+                <text x=6 dominant-baseline='middle'>{{name}}</text>
             </g>
         </g>
     </svg>
@@ -77,20 +88,17 @@
 </template>
 
 <script>
-
-
-// const values = Object.entries(cv).map( (d)=>new Date(d[1]['gallery_centrality']) )
-        
+import {peaks} from '../utils'
 import * as d3 from "d3";
 window.d3 = d3;
 export default{
-    name: 'vtimeline',
+    name: 'careertrajectory',
     dev: {
         useEslint: false
     },
 
     mounted: function(){
-        window.vtimeline = this;
+        window.careertrajectory = this;
 
         // window.addEventListener('resize', ()=>{
         //     this.width = this.$el.clientWidth;
@@ -125,23 +133,18 @@ export default{
     },
 
     computed: {
-        peaks: function(){
-            const values = this.plot.map( (d)=>d.y )
-            return values.map((d, i) => {
-                return d > (values[i-1] || -Infinity) 
-                    && d > (values[i+1] || -Infinity)
-                    && d > (values[i-2] || -Infinity)
-                    && d > (values[i+2] || -Infinity);
-            });
-        },
-
+        // all plots
         xdomain: function(){
             const x = this.plot.map( (d)=>d.x );
             return [d3.min(x), d3.max(x)];
         },
+
         ydomain: function(){
             const y = this.plot.map( (d)=>d.y );
-            return [d3.min(y), d3.max(y)];
+            const ymin = d3.min(y)
+            const ymax = d3.max(y)
+            const domain = ymax-ymin;
+            return [0, ymax+domain*0.1];
         },
 
         xscale: function(){
@@ -156,6 +159,7 @@ export default{
             .range([this.height-this.margin.bottom, this.margin.top]);
         },
 
+        // axis
         xticks: function(){
             return this.xscale.ticks(d3.timeYear);
         },
@@ -164,6 +168,9 @@ export default{
             return this.yscale.ticks();
         },
 
+        // stem plot
+
+        // line plot
         vertices: function(){
             let points = this.plot.map( (d)=>{
                 return [this.xscale(d.x), this.yscale(d.y)]
@@ -181,9 +188,22 @@ export default{
 
             points = points.map( (p)=>`${p[0]}, ${p[1]}`);
             return points
+        },
 
-            // return "20,40 40,25 60,40 80,120 120,140 200,180"
-        }
+        // // scatterplot
+        // points: function(){
+
+        // },
+
+        // //
+        // stems: function(){
+
+        // },
+
+        // annotations
+        peaks: function(){
+            return peaks(this.plot.map( (d)=>d.y ), 2)
+        },
     }
 }
 
@@ -219,28 +239,25 @@ export default{
 }
 
 /*bars*/
-.plot .bar line{
+.plot .stem line{
     stroke: hsl(0, 0%, 30%);
     stroke-width: 1px;
 }
 
-.plot .bar circle{
+.plot circle{
     r: 4;
     stroke: transparent;
     stroke-width: 10;
     /*fill: grey;*/
 }
-.plot .bar text{
+.plot text{
     text-anchor: middle;
     font-size: 6px;
     transform: translate(0px, -1em);
 }
-.plot .bar:hover text{
-    visibility: visible;
-}
 
 /*chart*/
-.plot polyline{
+.plot .line polyline{
     fill: hsla(0, 0%, 70%, 0.1);
     stroke: none;
 }
