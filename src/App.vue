@@ -69,7 +69,7 @@ export default {
       this.$store.state.error_msg = "webAssembly is not supported";
     }
   },
-  
+
   mounted: function(){
     try{
       this.$store.dispatch('fetchDatabase');
