@@ -49,9 +49,6 @@
       }});
       this._layout.start();
 
-      window.renderer = this._renderer;
-      window.layout = this._layout
-
     },
 
     created: function(){

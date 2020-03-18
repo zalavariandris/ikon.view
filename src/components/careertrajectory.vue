@@ -3,7 +3,7 @@
     <div class="tooltip" ref='tooltip'>
         TOOLTIP
     </div>
-    <svg :width="margin.left+width+margin.right" :height="height">
+    <svg :viewBox="`0,0, ${width}, ${height}`" style="width: 100%; height: 100%;">
         <g class="axis">
             <g class="xaxis">
                 <line class="domain"
@@ -49,6 +49,7 @@
                     :y2="yscale(d.y)"
                     ></line>
             </g>
+
             <g class="scatter">
                 <circle
                     v-for="(d, i) in plot"
@@ -60,6 +61,7 @@
                     :fill="d.color"
                 ></circle>
             </g>
+
             <g class="annotations">
                 <text 
                     v-for="(d, i) in plot"
@@ -90,7 +92,7 @@
 <script>
 import {peaks} from '../utils'
 import * as d3 from "d3";
-window.d3 = d3;
+
 export default{
     name: 'careertrajectory',
     dev: {
@@ -98,12 +100,10 @@ export default{
     },
 
     mounted: function(){
-        window.careertrajectory = this;
-
-        // window.addEventListener('resize', ()=>{
-        //     this.width = this.$el.clientWidth;
-        //     this.height = this.$el.clientWidth;
-        // });
+        window.addEventListener('resize', ()=>{
+            // this.width = this.$el.clientWidth-this.margin.left-this.margin.right;
+            // this.height = this.$el.clientWidth;
+        });
     },
 
     props: ['plot', 'legend', 'xlim', 'ylim'],
@@ -120,7 +120,7 @@ export default{
         showTooltip: function(d){
             let tooltip = this.$refs.tooltip;
             tooltip.style.display = 'block';
-            tooltip.style.visibility= 'visible';
+            tooltip.style.opacity= 1.0;
             tooltip.style.left = this.xscale(d.x)+'px';
             tooltip.style.top = this.yscale(d.y)+'px';
             tooltip.textContent = d.tooltip
@@ -128,7 +128,7 @@ export default{
 
         hideTooltip: function(){
             let tooltip = this.$refs.tooltip;
-            tooltip.style.visibility= 'hidden';
+            tooltip.style.opacity= 0.0;
         }
     },
 
@@ -168,8 +168,6 @@ export default{
             return this.yscale.ticks();
         },
 
-        // stem plot
-
         // line plot
         vertices: function(){
             let points = this.plot.map( (d)=>{
@@ -189,16 +187,6 @@ export default{
             points = points.map( (p)=>`${p[0]}, ${p[1]}`);
             return points
         },
-
-        // // scatterplot
-        // points: function(){
-
-        // },
-
-        // //
-        // stems: function(){
-
-        // },
 
         // annotations
         peaks: function(){
@@ -220,14 +208,14 @@ export default{
 
 .tooltip{
     position: absolute;
-    visibility: hidden;
+    /*visibility: hidden;*/
 
     background-color: white;
     padding: 0.2em;
     margin: 0 0.1em;
     box-shadow: 1px 1px 3px rgba(0,0,0, 10%);
 
-    transition: left 0.3s, top 0.3s;
+    transition: left 0.3s, top 0.3s, opacity 0.3s;
 
     pointer-events: none;
 

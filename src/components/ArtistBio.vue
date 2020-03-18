@@ -44,7 +44,7 @@
     },
 
     created: function(){
-      window.view = this;
+      
     },
 
     computed: {    

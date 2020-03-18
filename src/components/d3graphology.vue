@@ -6,7 +6,6 @@
 <script>
   import * as d3 from "d3";
   import subGraph from 'graphology-utils/subgraph';
-  window.d3 = d3;
   export default {
     name: 'd3graphology',
     props: ['graph'],
@@ -43,8 +42,6 @@
       this.updateNodes();
       this.updateLinks();
       this.updateLabels();
-
-      window.d3graphology = this;
     },
 
     watch: {
@@ -272,25 +269,6 @@
 
         label.exit().remove();
 
-      },
-
-      zoomFit: function(paddingPercent) {
-        let root = this.viewport;
-        var bounds = root.node().getBBox();
-        var parent = root.node().parentElement;
-        var fullWidth = parent.clientWidth,
-            fullHeight = parent.clientHeight;
-        var width = bounds.width,
-            height = bounds.height;
-        var midX = bounds.x + width / 2,
-            midY = bounds.y + height / 2;
-        if (width == 0 || height == 0) return; // nothing to fit
-        var scale = (paddingPercent || 0.75) / Math.max(width / fullWidth, height / fullHeight);
-        var translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
-
-
-        this.viewport.attr("translate", translate)
-        this.viewport.attr('scale', scale)
       },
 
       fit: function(){

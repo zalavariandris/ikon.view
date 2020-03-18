@@ -55,7 +55,7 @@
                 const paths = result[0].values
 
                 let G = new graphology.Graph()
-                window.G = G;
+
                 for(let path of paths){
                     if(!G.hasNode('a'+path[0]))
                         G.addNode('a'+path[0], {color:'red'})

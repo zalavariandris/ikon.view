@@ -22,7 +22,6 @@ export default new Vuex.Store({
     
     SET_DATABASE(state, database){
       state.database = database;
-      window.database = database;
     },
 
     SET_ERROR_MSG(state, msg){
