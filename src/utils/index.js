@@ -15,13 +15,13 @@ function groupBy(list, by){
 }
 
 function peaks(values, distance){
-    return values.map((v, i) => {
-        const neighbours = [
-        ...values.slice(i-distance, i),
-        ...values.slice(i+1, i+1+distance)
-        ]
-        return neighbours.every((n)=>n<v)
-    });
+  return values.map((v, i) => {
+    const neighbours = [
+    ...values.slice(i-distance, i),
+    ...values.slice(i+1, i+1+distance)
+    ]
+    return neighbours.every((n)=>n<v)
+  });
 }
 
 export {groupBy, peaks};

@@ -37,14 +37,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
-
-
-/* COMPNENTS */
-// import HelloWorld from './components/HelloWorld.vue'
-import ExhibitionListView from './views/ExhibitionListView.vue'
-import ArtistListView from './views/ArtistListView.vue'
-
 
 /* ROUTING */
 import router from './router'
@@ -58,11 +50,26 @@ export default {
   name: 'App',
   store,
   router,
-  components: {
-    ExhibitionListView,
-    ArtistListView
+  created: function(){
+    // check webassembly support
+    const supported = (() => {
+        try {
+            if (typeof WebAssembly === "object"
+                && typeof WebAssembly.instantiate === "function") {
+                const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+                if (module instanceof WebAssembly.Module)
+                    return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+            }
+        } catch (e) {
+          this.$store.state.error_msg = "webAssembly is not supported"+ e;
+        }
+        return false;
+    })();
+    if(!supported){
+      this.$store.state.error_msg = "webAssembly is not supported";
+    }
   },
-
+  
   mounted: function(){
     try{
       this.$store.dispatch('fetchDatabase');
@@ -76,12 +83,15 @@ export default {
     ready: function(){
       return this.$store.state.database ? true : false;
     },
+
     loadingStatus: function(){
       return this.$store.state.loadingStatus;
     },
+    
     loadingProgress: function(){
       return this.$store.state.loadingProgress;
     },
+    
     error_msg: function(){
       return this.$store.state.error_msg;
     }
