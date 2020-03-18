@@ -10,7 +10,7 @@ https://medium.com/@Roli_Dori/deploy-vue-cli-3-project-to-github-pages-ebeda0705
 ```
 npm run build
 // comment out dist/ in .gitignore. dont commit to master branch
-git add dist && git commit -m "Initial dist subtree commit"
+git add dist && git commit -m "dist subtree commit"
 git subtree push --prefix dist origin gh-pages
 // uncomment dist folder in .gitignore
 ```

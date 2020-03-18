@@ -34,7 +34,7 @@
   export default {
     name: 'HomeView',
     store,
-    computed: {
+    computeF: {
       artistsCount: function(){
         return this.$store.getters.artistsCount;
       },

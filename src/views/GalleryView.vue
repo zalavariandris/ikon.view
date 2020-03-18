@@ -8,7 +8,7 @@
         <h3>Exhibitions</h3>
         <ul class="group">
           <li
-          v-for="group in groupBy(exhibitions, (e)=>new Date(e.opening).getFullYear())"
+          v-for="group in groupBy(exhibitions, (e)=>moment(e.opening).year())"
           :key="group[0]">
             {{group[0]}}
             <ul>
@@ -28,11 +28,13 @@
 <script>
   import store from '../store'
   import {groupBy} from '../utils'
+  import moment from 'moment'
   export default {
     name: 'GalleryView',
     store,
     methods: {
-      groupBy
+      groupBy,
+      moment
     },
     computed: {
       gallery: function(){

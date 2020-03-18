@@ -14,7 +14,7 @@
     mounted: function() {
       console.log('mounted');
       window.d3graphology = this;
-      const width = 500;
+      // const width = 500;
       const height = 300;
       // create svg
       this.svg = d3.select(this.$el)
@@ -157,7 +157,7 @@
         .selectAll('.node')
         .data(this.simgraph.nodes, (d)=>d)
 
-        let showDetails = (r, i)=>{
+        let showDetails = (r)=>{
           this.viewport.classed('nodes-highlighted', true)
 
           let subnodes = this.graph.neighbors(r.id).concat([r.id]);
@@ -175,7 +175,7 @@
           .classed('highlighted', true)
         }
 
-        let hideDetails = (d, i)=>{
+        let hideDetails = ()=>{
           this.viewport.classed('nodes-highlighted', false)
 
           d3.selectAll('.node')
@@ -274,7 +274,7 @@
 
       },
 
-      zoomFit: function(paddingPercent, transitionDuration) {
+      zoomFit: function(paddingPercent) {
         let root = this.viewport;
         var bounds = root.node().getBBox();
         var parent = root.node().parentElement;
@@ -317,8 +317,7 @@
 <style>
   .node{
     fill: darkgrey;
-    transition: fill 0.1s;
-    transition: opacity 0.1s;
+    transition: fill 0.5s, opacity 0.5s;
   }
   .node.artist{
     fill: hsl(220, 26%, 68%);
@@ -343,7 +342,7 @@
   .link{
     stroke: hsl(60, 18%, 87%);
     stroke-width: 10px;
-    transition: stroke-width 0.7s, stroke 0.7s;
+    transition: stroke-width 0.5s, stroke 0.5s;
   }
 
   .link.highlighted{

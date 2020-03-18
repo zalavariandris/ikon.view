@@ -9,7 +9,7 @@ body{
   min-height: 100vh;
 }
 
-.paginate{
+.vpaginate{
   float: right;
   padding: 1em 0;
 }

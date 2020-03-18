@@ -4,10 +4,10 @@
       <!-- <h1>Exhibition</h1> -->
       <h2>{{exhibition.title}}</h2>
       <p>
-        {{exhibition.opening}}
-        {{new Date(exhibition.opening).toLocaleDateString()}}
-        <template v-if="!isNaN(new Date(exhibition.closing))">
-        - {{new Date(exhibition.closing).toLocaleDateString()}}
+        <!-- {{exhibition.opening}} -->
+        {{moment(exhibition.opening).format('Y/M/D')}}
+        <template v-if="!isNaN(moment(exhibition.closing))">
+        - {{moment(exhibition.opening).format('Y/M/D')}}
         </template>
       </p>
       <p>
@@ -62,9 +62,16 @@
 
 <script>
   import store from '../store'
+  import moment from 'moment'
   export default {
     name: 'ExhibitionView',
     store,
+    created: function(){
+      window.view = this;
+    },
+    methods:{
+      moment
+    },
     computed: {
       exhibition: function(){
         return this.$store.getters.getExhibitionById(this.$route.params.id)

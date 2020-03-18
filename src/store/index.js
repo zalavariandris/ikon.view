@@ -26,26 +26,26 @@ export default new Vuex.Store({
     },
 
     SET_ERROR_MSG(state, msg){
-    	state.error_msg = msg;
+      state.error_msg = msg;
     }
   },
 
   actions:{
     fetchDatabase: function(context){
       context.commit('SET_LOADING_STATUS', 'loading');
-      const SQL = initSqlJs({
+      initSqlJs({
         locateFile: file => `./${file}`
       }).then((SQL)=>{
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', "./ikon_v005.db", true);
+        xhr.open('GET', "./ikon_v007.db", true);
         xhr.responseType = 'arraybuffer';
 
-        xhr.onprogress = (e)=>{
-          let progress = e.loaded/e.total;
+        xhr.onprogress = (event)=>{
+          let progress = event.loaded/event.total;
           context.commit('SET_LOADING_PROGRESS', progress);
         }
 
-        xhr.onload = (e)=> {
+        xhr.onload = ()=> {
           var uInt8Array = new Uint8Array(xhr.response);
           let db = new SQL.Database(uInt8Array);
           context.commit('SET_DATABASE', db);
@@ -65,7 +65,7 @@ export default new Vuex.Store({
 
   getters:{
     // Query Artists
-    artistsCount: (state, getters) => {
+    artistsCount: (state) => {
       console.assert(state.database!=null)
 
       let sql = `
@@ -81,7 +81,7 @@ export default new Vuex.Store({
       return results[0].values[0][0];
     },
 
-    getArtistById: (state, getters) => (id) => {
+    getArtistById: (state) => (id) => {
       console.assert(state.database!=null)
 
       let sql = `
@@ -99,7 +99,7 @@ export default new Vuex.Store({
       }
     },
 
-    getArtistsByIds: (state, getters) => (ids) => {
+    getArtistsByIds: (state) => (ids) => {
       console.assert(state.database!=null)
 
       let sql = `
@@ -186,7 +186,7 @@ export default new Vuex.Store({
       });
     },
 
-    getArtistsByExhibitionIds: (state, getters) => (ids)=> {
+    getArtistsByExhibitionIds: (state) => (ids)=> {
       console.assert(state.database!=null)
       
       const sql = `
@@ -225,11 +225,11 @@ export default new Vuex.Store({
       return results[0].values[0][0]
     },
 
-    getExhibitionById: (state, getters) => (id) => {
+    getExhibitionById: (state) => (id) => {
       console.assert(state.database!=null)
 
       let sql = `
-      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
+      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name
       FROM exhibitions e
       JOIN galleries g ON g.ikonid=e.gallery_id
       WHERE e.ikonid = ${id}
@@ -241,20 +241,19 @@ export default new Vuex.Store({
       return {
         id: row[0],
         title: row[1],
-        openingDate: row[2],
-        closingDate: row[3],
+        opening: row[2],
+        closing: row[3],
         gallery_id: row[4],
-        gallery: row[5],
-        description: row[6]
+        gallery: row[5]
       }
     },
 
 
-    getExhibitionsByIds: (state, getters) => (ids) => {
+    getExhibitionsByIds: (state) => (ids) => {
       console.assert(state.database!=null)
 
       let sql = `
-      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name, e.description
+      SELECT e.ikonid, e.title, e.opening, e.closing, g.ikonid, g.name
       FROM exhibitions e
       JOIN galleries g ON g.ikonid=e.gallery_id
       WHERE e.ikonid IN (${ids})
@@ -268,8 +267,7 @@ export default new Vuex.Store({
           opening: row[2],
           closing: row[3],
           gallery_id: row[4],
-          gallery: row[5],
-          description: row[6]
+          gallery: row[5]
         }
       });
     },
@@ -324,7 +322,7 @@ export default new Vuex.Store({
         return results[0].values[0][0]
     },
 
-    getExhibitionsByArtistId: (state, getters) => (id) => {
+    getExhibitionsByArtistId: (state) => (id) => {
       console.assert(state.database!=null)
       
       const sql = `
@@ -368,7 +366,7 @@ export default new Vuex.Store({
       });
     },
 
-    getExhibitionsByGalleryId: (state, getters) => (id) => {
+    getExhibitionsByGalleryId: (state) => (id) => {
       console.assert(state.database!=null)
       
       const sql = `
@@ -412,7 +410,7 @@ export default new Vuex.Store({
       return results[0].values[0][0]
     },
 
-    getGalleryById: (state, getters) => (id) => {
+    getGalleryById: (state) => (id) => {
         if(state.database == undefined)
           return {};
 

@@ -1,16 +1,20 @@
 <template>
   <div class="CV">
     <!-- <h2>CV</h2> -->
-    <section v-for="category in categories">
+    <section
+      v-for="category in categories"
+      :key="category[0]">
       <h3>{{category[0]}}</h3>
       <ul class=group>
-        <li v-for="(group in groupBy(category[1], (e)=>new Date(e.opening).getFullYear())">
+        <li 
+          v-for="group in groupBy(category[1], (e)=>moment(e.opening).year())"
+          v-bind:key="group[0]">
           {{group[0]}}
           <ul>
             <li class="exhibition"
             v-for='e in group[1]'
-            v-bind:key="e.id"
-            v-bind:class="{solo: category[0]=='Exhibitions' && e.artistsCount==1}">
+            :key="e.id"
+            :class="{solo: category[0]=='Exhibitions' && e.artistsCount==1}">
             <router-link :to="{name: 'exhibition', params: {id: e.id}}">
               {{e.title}}
               <small v-if="category[0]=='Exhibitions' && e.artistsCount==1">(solo)</small>
@@ -28,17 +32,19 @@
 </template>
 <script>
   import store from '../store';
-
   import {groupBy} from '../utils'
+  import moment from 'moment'
+
   export default{
     name: 'ArtistBio',
     store,
     methods:{
-      groupBy
+      groupBy,
+      moment
     },
 
     created: function(){
-      window.bio = this;
+      window.view = this;
     },
 
     computed: {    

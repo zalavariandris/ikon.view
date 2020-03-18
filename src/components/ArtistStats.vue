@@ -23,9 +23,9 @@
     import subGraph from 'graphology-utils/subgraph';
     import d3graphology from '../components/d3graphology.vue';
     import careertrajectory from '../components/careertrajectory.vue';
+    import moment from 'moment'
 
     export default {
-        name: 'ArtistStats',
         components:{careertrajectory, d3graphology},
 
         computed:{
@@ -94,7 +94,7 @@
                 // set node visual attributes
                 for(let n of G.nodes()){
                     let degreeCentrality = G.getNodeAttribute(n, 'degree');
-                    let defaultSize = 10;
+                    let defaultSize = 40;
                     G.setNodeAttribute(n, 'size', n[0]=='a' ? Math.log1p(degreeCentrality**3)*20 : defaultSize);
                 }
                 
@@ -131,10 +131,10 @@
             plot: function(){
                 let plot = this.exhibiting.map( (d)=>{
                     return {
-                        x: new Date(d.opening),
+                        x: moment(d.opening),
                         y: d.exhibition_count,
                         label: d.gallery,
-                        tooltip: d.title+'\n'+d.gallery+'\n'+new Date(d.opening).toLocaleDateString(),
+                        tooltip: d.title+'\n'+d.gallery+'\n'+moment(d.opening).format('D/M/Y'),
                         color: d.artistCount==1 ? 'pink' : 'lightsteelblue'
                     }
                 });
