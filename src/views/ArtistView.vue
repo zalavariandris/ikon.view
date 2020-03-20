@@ -31,9 +31,17 @@
   export default {
     name: 'ArtistView',
     store,
+    created: function(){
+      this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
+      this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
+      this.$watch( '$route.params.id', ()=>{
+        this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
+        this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
+      });
+    },
     computed: {
       artist: function(){
-        return this.$store.getters.getArtistById(this.$route.params.id);
+        return this.$store.state.artist.currentArtist;
       }
     }
   }

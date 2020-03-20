@@ -1,14 +1,14 @@
 <template>
   <div class="ExhibitionListView">
-    <h2>Exhibitions <small>({{count}})</small></h2>
-    <input v-model="search" placeholder="filter">
+    <h2>Exhibitions</h2>
+    
     <vpaginate
       v-model="page"
-      :count="Math.ceil(resultsCount/limit)">
+      :count="Math.ceil(count/limit)">
     </vpaginate>
     <table>
       <thead>
-        <td width="50%">title</td>
+        <td width="50%"><input v-model="search" placeholder="search title"></td>
         <td width="20%">gallery</td>
         <td width="60px">opening</td>
         <td width="60px">closing</td>
@@ -32,12 +32,12 @@
             </router-link>
           </td>
           <td>
-            <small>{{e.opening}}</small>
+            <small>{{moment(e.opening).format('D/M/Y')}}</small>
           </td>
           <td>
-            <small>{{e.closing}}</small>
+            <small>{{moment(e.closing).format('D/M/Y')}}</small><br/>
+            <small>{{moment(e.closing).diff(moment(e.opening), 'days')}} days</small>
           </td>
-
         </tr>
       </tbody>
     </table>
@@ -47,15 +47,17 @@
 <script>
   import store from '../store'
   import vpaginate from '../components/vpaginate'
+  import moment from 'moment'
   export default {
     name: 'ExhibitionListView',
+    store,
     components: {
       vpaginate
     },
-    store,
-    created: function(){
-      window.view = this;
+    methods:{
+      moment
     },
+
     data: function(){
       return {
         search: "",
@@ -63,24 +65,36 @@
         page: 1
       };
     },
+
+    created: function(){
+      this.$store.dispatch('searchExhibitions', {
+        title: this.search,
+        limit: this.limit,
+        page: this.page
+      });
+
+      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
+        this.$store.dispatch('searchExhibitions', {
+          title: this.search,
+          limit: this.limit,
+          page: this.page
+        });
+      })
+    },
     
     computed:{
       exhibitions: function(){
-        return this.$store.getters.getExhibitionsLikeTitle(this.search, this.limit, this.page);
-      },
-
-      resultsCount: function(){
-        return this.$store.getters.getExhibitionsLikeTitleCount(this.search);
+        return this.$store.state.search.exhibitions.data;
       },
 
       count: function(){
-        return this.$store.getters.exhibitionsCount;
+        return this.$store.state.search.exhibitions.count;
       }
     },
 
     watch:{
       search: function(){
-        this.page = 0;
+        this.page = 1;
       }
     }
   }

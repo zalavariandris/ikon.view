@@ -209,6 +209,7 @@ export default{
 .tooltip{
     position: absolute;
     /*visibility: hidden;*/
+    opacity: 0.0;
 
     background-color: white;
     padding: 0.2em;

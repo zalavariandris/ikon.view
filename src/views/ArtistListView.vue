@@ -1,11 +1,9 @@
 <template>
   <div class="ArtistListView">
-    <h2>Artists
-    <small>({{count}})</small>
-    </h2>
+    <h2>Artists</h2>
     <vpaginate 
       v-model="page"
-      :count="Math.ceil(resultsCount/limit)">
+      :count="Math.ceil(count/limit)">
     </vpaginate>
     <table>
       <thead>
@@ -35,6 +33,7 @@
     components:{
       vpaginate
     },
+
     data: function(){
       return {
         search: "",
@@ -42,24 +41,40 @@
         page: 1
       };
     },
-    
+
+    created: function(){
+      this.$store.dispatch('searchArtists', {
+        name: this.search, 
+        limit: this.limit, 
+        page: this.page
+      });
+
+      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
+        this.$store.dispatch('searchArtists', {
+          name: this.search, 
+          limit: this.limit, 
+          page: this.page
+        });
+      } );
+    },
+
     computed:{
       artists: function(){
-        return this.$store.getters.getArtistsLikeName(this.search, this.limit, this.page)
+        return this.$store.state.search.artists.data;
       },
 
       count: function(){
-        return this.$store.getters.artistsCount;
+        return this.$store.state.search.artists.count;
       },
 
-      resultsCount: function(){
-        return this.$store.getters.getArtistsLikeNameCount(this.search, this.limit, this.page);
+      total: function(){
+        return this.$store.state.search.artists.total;
       }
     },
 
     watch:{
       search: function(){
-        this.page = 0;
+        this.page = 1;
       }
     }
   }

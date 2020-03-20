@@ -36,13 +36,23 @@
       groupBy,
       moment
     },
+    created: function(){
+      this.$store.dispatch('gallery/fetchGallery', this.$route.params.id)
+      this.$store.dispatch('gallery/fetchExhibitions',this.$route.params.id);
+
+      this.$watch('$route.params.id', ()=>{
+        this.$store.dispatch('gallery/fetchGallery', this.$route.params.id)
+        this.$store.dispatch('gallery/fetchExhibitions',this.$route.params.id);
+      });
+    },
+
     computed: {
       gallery: function(){
-        return this.$store.getters.getGalleryById(this.$route.params.id);
+        return this.$store.state.gallery.currentGallery;
       },
       
       exhibitions: function(){
-        return this.$store.getters.getExhibitionsByGalleryId(this.$route.params.id);
+        return this.$store.state.gallery.exhibitions;
       }
     }
   }

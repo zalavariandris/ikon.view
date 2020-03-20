@@ -58,8 +58,6 @@ https://medium.com/@Roli_Dori/deploy-vue-cli-3-project-to-github-pages-ebeda0705
 - add remote from github
 - create gh-pages branch
 ```
-npm run build
-git add -f dist && git commit -m "dist subtree commit2"
-git subtree push --prefix dist origin gh-pages
-git rm -r dist --cached
+npm run build && git add -f dist && git commit -m "dist subtree commit2" && git subtree push --prefix dist origin gh-pages && git rm -r dist --cached
+
 ```

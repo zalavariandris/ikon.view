@@ -1,14 +1,13 @@
 <template>
   <div class="GalleryListView">
-    <h2>Galleries <small>({{count}})</small></h2>
-    <input v-model="search" placeholder="filter">
+    <h2>Galleries</h2>
     <vpaginate 
       v-model="page"
-      :count="Math.ceil(resultsCount/limit)">
+      :count="Math.ceil(count/limit)">
     </vpaginate>
     <table>
       <thead>
-        <td>name</td>
+        <td><input v-model="search" placeholder="search name"></td>
       </thead>
       <tbody>
         <tr v-for='g in galleries' v-bind:key="g.id">
@@ -32,6 +31,7 @@
     components:{
       vpaginate
     },
+
     data: function(){
       return {
         search: "",
@@ -39,28 +39,41 @@
         page: 1
       };
     },
+
+    created: function(){
+      this.$store.dispatch('searchGalleries', {
+        name: this.search,
+        limit: this.limit,
+        page: this.page
+      });
+
+      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
+        this.$store.dispatch('searchGalleries', {
+          name: this.search,
+          limit: this.limit,
+          page: this.page
+        });
+      });
+    },
     
     computed:{
       galleries: function(){
-        return this.$store.getters.getGalleriesLikeName(this.search, this.limit, this.page);
+        return this.$store.state.search.galleries.data;
       },
 
       count: function(){
-        return this.$store.getters.galleriesCount;
+        return this.$store.state.search.galleries.count;
       },
 
-      resultsCount: function(){
-        return this.$store.getters.getGalleriesLikeNameCount(this.search);
-
+      total: function(){
+        return this.$store.state.search.galleries.total;
       }
     },
 
     watch:{
       search: function(){
-        this.page = 0;
+        this.page = 1;
       }
     }
-
-
   }
 </script>

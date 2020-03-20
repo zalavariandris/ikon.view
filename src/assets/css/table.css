@@ -37,11 +37,16 @@ thead td{
 
 /* BODY */
 tbody tr:hover{
-  background: hsl(44, 98%, 67%);
+  /*border-left: 3px black solid;*/
+  /*background: hsl(44, 98%, 67%);*/
+}
+
+tbody tr:nth-child(even){
+  /*background-color: hsl(0,0%, 96%);*/
 }
 
 /* special cases */
-tr.notExhibition{
+tbody tr.notExhibition{
   opacity: 1.0;
   color: grey;
 }

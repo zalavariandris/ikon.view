@@ -66,19 +66,26 @@
   export default {
     name: 'ExhibitionView',
     store,
-    created: function(){
-      window.view = this;
-    },
     methods:{
       moment
     },
+
+    created: function(){
+      this.$store.dispatch('exhibition/fetchExhibition', this.$route.params.id);
+      this.$store.dispatch('exhibition/fetchArtists', this.$route.params.id)
+      this.$watch('$rroute.params.id', ()=>{
+          this.$store.dispatch('exhibition/fetchExhibition', this.$route.params.id);
+        this.$store.dispatch('exhibition/fetchArtists', this.$route.params.id)    
+      })
+    },
+
     computed: {
       exhibition: function(){
-        return this.$store.getters.getExhibitionById(this.$route.params.id)
+        return this.$store.state.exhibition.currentExhibition;
       },
       
       all: function(){
-        return this.$store.getters.getArtistsByExhibitionId(this.$route.params.id)
+        return this.$store.state.exhibition.artists;
       },
 
       artists: function(){

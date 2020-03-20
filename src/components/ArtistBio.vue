@@ -43,13 +43,9 @@
       moment
     },
 
-    created: function(){
-      
-    },
-
     computed: {    
       exhibitions: function(){
-        return this.$store.getters.getExhibitionsByArtistId(this.$route.params.id);
+        return this.$store.state.artist.exhibitions;
       },
 
       exhibiting: function(){
@@ -57,11 +53,17 @@
       },
 
       curating: function(){
-        return this.exhibitions.filter( (e)=>e.relation=='curating' );
+        if(this.exhibitions)
+          return this.exhibitions.filter( (e)=>e.relation=='curating' );
+        else
+          return []
       },
 
       hosting: function(){
-        return this.exhibitions.filter( (e)=>e.relation=='opening' );
+        if(this.exhibitions)
+          return this.exhibitions.filter( (e)=>e.relation=='opening' );
+        else
+          return []
       },
 
       categories: function(){
@@ -76,11 +78,11 @@
 </script>
 
 <style>
-li.solo>a:nth-child(1){
-  font-weight: bold;
-}
+  li.solo>a:nth-child(1){
+    font-weight: bold;
+  }
 
-li>a:nth-child(2){
+  li>a:nth-child(2){
 
-}
+  }
 </style>
