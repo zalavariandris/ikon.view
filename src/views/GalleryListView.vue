@@ -1,14 +1,13 @@
 <template>
   <div class="GalleryListView">
     <h2>Galleries <small>({{count}})</small></h2>
-    <input v-model="search" placeholder="filter">
     <vpaginate 
       v-model="page"
       :count="Math.ceil(resultsCount/limit)">
     </vpaginate>
     <table>
       <thead>
-        <td>name</td>
+        <td><input v-model="search" placeholder="search name"></td>
       </thead>
       <tbody>
         <tr v-for='g in galleries' v-bind:key="g.id">

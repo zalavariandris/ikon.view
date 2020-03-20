@@ -1,14 +1,13 @@
 <template>
   <div class="ExhibitionListView">
     <h2>Exhibitions <small>({{count}})</small></h2>
-    <input v-model="search" placeholder="filter">
     <vpaginate
       v-model="page"
       :count="Math.ceil(resultsCount/limit)">
     </vpaginate>
     <table>
       <thead>
-        <td width="50%">title</td>
+        <td width="50%"><input v-model="search" placeholder="search title"></td>
         <td width="20%">gallery</td>
         <td width="60px">opening</td>
         <td width="60px">closing</td>
