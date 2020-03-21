@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vue/cli-plugin-eslint": "^4.2.3",
+    "axios": "^0.19.2",
     "chroma-js": "^2.1.0",
     "core-js": "^3.6.4",
     "d3": "^5.15.0",

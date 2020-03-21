@@ -7,12 +7,12 @@
     </vpaginate>
     <table>
       <thead>
-        <td><input v-model="search" placeholder="search name"></td>
+        <td><input v-model="keyword" placeholder="search name"></td>
       </thead>
       <tbody>
-        <tr v-for='g in galleries' v-bind:key="g.id">
+        <tr v-for='g in galleries' v-bind:key="g.ikonid">
           <td>
-            <router-link :to="{name: 'gallery', params: {id: g.id}}">
+            <router-link :to="{name: 'gallery', params: {id: g.ikonid}}">
               {{g.name}}
            </router-link>
           </td>
@@ -25,6 +25,7 @@
 <script>
   import store from '../store'
   import vpaginate from '../components/vpaginate'
+  import axios from 'axios'
   export default {
     name: 'GalleryListView',
     store,
@@ -34,44 +35,39 @@
 
     data: function(){
       return {
-        search: "",
+        keyword: "",
         limit: 15,
-        page: 1
+        page: 1,
+        galleries: [],
+        count: -1
       };
     },
 
     created: function(){
-      this.$store.dispatch('searchGalleries', {
-        name: this.search,
-        limit: this.limit,
-        page: this.page
-      });
-
-      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
-        this.$store.dispatch('searchGalleries', {
-          name: this.search,
-          limit: this.limit,
-          page: this.page
-        });
-      });
+      this.search();
+      this.$watch(()=>[this.keyword, this.limit, this.page], ()=>{
+        this.search()
+      })
     },
-    
-    computed:{
-      galleries: function(){
-        return this.$store.state.search.galleries.data;
-      },
 
-      count: function(){
-        return this.$store.state.search.galleries.count;
-      },
-
-      total: function(){
-        return this.$store.state.search.galleries.total;
+    methods: {
+      search: function(){
+        axios.get('http://localhost:3000/api/galleries', {
+          params: {
+            name: this.keyword,
+            limit: this.limit,
+            offset: (this.page-1)*this.limit
+          }
+        })
+        .then(response => {
+          this.galleries = response.data.data;
+          this.count = response.data.count;
+        });
       }
     },
 
-    watch:{
-      search: function(){
+    watch: {
+      keyword: function(){
         this.page = 1;
       }
     }

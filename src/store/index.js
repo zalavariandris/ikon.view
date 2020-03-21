@@ -4,15 +4,13 @@ import initSqlJs from 'sql.js';
 import artistStore from './modules/artistStore.js'
 import exhibitionStore from './modules/exhibitionStore.js'
 import galleryStore from './modules/galleryStore.js'
-import searchStore from './modules/searchStore.js'
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   modules:{
     artist: artistStore,
     exhibition: exhibitionStore,
-    gallery: galleryStore,
-    search: searchStore
+    gallery: galleryStore
   },
 
   state: {

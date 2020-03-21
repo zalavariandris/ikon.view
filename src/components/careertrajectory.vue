@@ -99,7 +99,7 @@ export default{
         useEslint: false
     },
 
-    mounted: function(){
+    created: function(){
         window.addEventListener('resize', ()=>{
             // this.width = this.$el.clientWidth-this.margin.left-this.margin.right;
             // this.height = this.$el.clientWidth;
@@ -170,6 +170,9 @@ export default{
 
         // line plot
         vertices: function(){
+            if(!this.plot.length){
+                return "";
+            }
             let points = this.plot.map( (d)=>{
                 return [this.xscale(d.x), this.yscale(d.y)]
             });
@@ -185,7 +188,7 @@ export default{
             points.push(last)
 
             points = points.map( (p)=>`${p[0]}, ${p[1]}`);
-            return points
+            return points.join(' ')
         },
 
         // annotations

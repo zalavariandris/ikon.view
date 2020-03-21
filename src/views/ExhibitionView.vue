@@ -12,7 +12,7 @@
       </p>
       <p>
         <router-link :to="{name: 'gallery', params: {id: exhibition.gallery_id}}">
-          {{exhibition.gallery}}
+          {{exhibition.gallery_name}}
         </router-link>
       </p>
       <p>
@@ -63,32 +63,50 @@
 <script>
   import store from '../store'
   import moment from 'moment'
+  import axios from 'axios'
+  window.axios = axios;
   export default {
     name: 'ExhibitionView',
     store,
     methods:{
-      moment
+      moment,
+      fetch: function(){
+        axios.get('http://localhost:3000/api/exhibition/'
+          +this.$route.params.id)
+        .then(response => {
+          this.exhibition = response.data;
+        });
+
+        axios.get('http://localhost:3000/api/exhibition/'
+          +this.$route.params.id
+          +'/artists')
+        .then( response => {
+          console.log('artists', response.data);
+          this.all = response.data;
+        } );
+      }
+    },
+
+    data: function(){
+      return {
+        exhibition: null,
+        all: []
+      }
     },
 
     created: function(){
-      this.$store.dispatch('exhibition/fetchExhibition', this.$route.params.id);
-      this.$store.dispatch('exhibition/fetchArtists', this.$route.params.id)
-      this.$watch('$rroute.params.id', ()=>{
-          this.$store.dispatch('exhibition/fetchExhibition', this.$route.params.id);
-        this.$store.dispatch('exhibition/fetchArtists', this.$route.params.id)    
-      })
+      this.fetch();
+    },
+
+    watch: {
+      $route: function(){
+        this.fetch();
+      }
     },
 
     computed: {
-      exhibition: function(){
-        return this.$store.state.exhibition.currentExhibition;
-      },
-      
-      all: function(){
-        return this.$store.state.exhibition.artists;
-      },
-
       artists: function(){
+        console.log(this.all)
         return this.all.filter( (a)=>a.relation == 'exhibiting' );
       },
 

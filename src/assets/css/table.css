@@ -4,7 +4,11 @@ table{
   padding: 1px;
   background: white;
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
+}
+th, td{
+  width: auto;
+
 }
 
 td{
@@ -16,6 +20,10 @@ td {
   text-align:left;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+td:last-child:not(:first-child){
+  text-align: right;
 }
 
 /* HEAD */
@@ -33,6 +41,7 @@ thead td{
   padding-bottom: 0.5em;
   padding-top: 1em;
   margin-bottom: 1em;
+  white-space: nowrap
 }
 
 /* BODY */

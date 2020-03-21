@@ -14,7 +14,7 @@
             <ul>
               <li v-for='e in group[1]' 
                   :key="e.id">
-                <router-link :to="{name: 'exhibition', params: {id: e.id}}">
+                <router-link :to="{name: 'exhibition', params: {id: e.ikonid}}">
                   {{e.title}}
                 </router-link>
               </li>
@@ -29,30 +29,43 @@
   import store from '../store'
   import {groupBy} from '../utils'
   import moment from 'moment'
+  import axios from 'axios'
   export default {
     name: 'GalleryView',
     store,
+    data: function(){
+      return {
+        gallery: null,
+        exhibitions: []
+      }
+    },
     methods: {
       groupBy,
-      moment
+      moment,
+      fetch: function(){
+        axios.get('http://localhost:3000/api/gallery/'
+          +this.$route.params.id)
+        .then(response => {
+          console.log(response)
+          this.gallery = response.data;
+        });
+
+        axios.get('http://localhost:3000/api/gallery/'
+          +this.$route.params.id
+          +'/exhibitions')
+        .then(response => {
+          console.log(response)
+          this.exhibitions = response.data;
+        });
+      }
     },
     created: function(){
-      this.$store.dispatch('gallery/fetchGallery', this.$route.params.id)
-      this.$store.dispatch('gallery/fetchExhibitions',this.$route.params.id);
-
-      this.$watch('$route.params.id', ()=>{
-        this.$store.dispatch('gallery/fetchGallery', this.$route.params.id)
-        this.$store.dispatch('gallery/fetchExhibitions',this.$route.params.id);
-      });
+      this.fetch();
     },
 
-    computed: {
-      gallery: function(){
-        return this.$store.state.gallery.currentGallery;
-      },
-      
-      exhibitions: function(){
-        return this.$store.state.gallery.exhibitions;
+    watch: {
+      $route: function(){
+        this.fetch();
       }
     }
   }

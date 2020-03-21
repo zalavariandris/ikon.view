@@ -7,8 +7,8 @@
     </vpaginate>
     <table>
       <thead>
-        <td><input v-model="search" placeholder="search name"></td>
-        <td width='70px'>exhibitions</td>
+        <td><input v-model="keyword" placeholder="search name"></td>
+        <td>N° exhibitions</td>
       </thead>
       <tbody>
         <tr v-for='a in artists' v-bind:key="a.id">
@@ -17,7 +17,7 @@
               {{a.name}}
             </router-link>
           </td>
-          <td>{{a.count}}</td>
+          <td>{{a.no_exhibitions}}</td>
         </tr>
       </tbody>
     </table>
@@ -27,6 +27,7 @@
 <script>
   import store from '../store'
   import vpaginate from '../components/vpaginate'
+  import axios from 'axios'
   export default {
     name: 'ArtistListView',
     store,
@@ -36,45 +37,41 @@
 
     data: function(){
       return {
-        search: "",
+        keyword: "",
         limit: 15,
-        page: 1
+        page: 1,
+        artists: [],
+        count: -1
       };
     },
 
-    created: function(){
-      this.$store.dispatch('searchArtists', {
-        name: this.search, 
-        limit: this.limit, 
-        page: this.page
-      });
-
-      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
-        this.$store.dispatch('searchArtists', {
-          name: this.search, 
-          limit: this.limit, 
-          page: this.page
-        });
-      } );
+    mounted: function(){
+      window.axios = axios;
+      this.search();
+      this.$watch(()=>[this.keyword, this.limit, this.page], ()=>{
+        this.search()
+      })
     },
 
-    computed:{
-      artists: function(){
-        return this.$store.state.search.artists.data;
-      },
-
-      count: function(){
-        return this.$store.state.search.artists.count;
-      },
-
-      total: function(){
-        return this.$store.state.search.artists.total;
+    watch: {
+      keyword: function(){
+        this.page=1;
       }
     },
 
-    watch:{
+    methods:{
       search: function(){
-        this.page = 1;
+        axios.get('http://localhost:3000/api/artists', {
+          params: {
+            name: this.keyword,
+            limit: this.limit,
+            offset: (this.page-1)*this.limit
+          }
+        })
+        .then(response => {
+          this.artists = response.data.data;
+          this.count = response.data.count;
+        });
       }
     }
   }

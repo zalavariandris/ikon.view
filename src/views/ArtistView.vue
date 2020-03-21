@@ -11,7 +11,7 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'artist.stats', params: {id: artist.id}}">
+            <router-link :to="{name: 'artist', params: {id: artist.id, page:'stats'}}">
               stats
             </router-link>
           </li>
@@ -20,29 +20,48 @@
     </header>
 
     <main>
-      <router-view></router-view>
+      <template v-if="$route.params.page=='stats'">
+        <ArtistStats :exhibitions="exhibitions"></ArtistStats>
+      </template>
+      <template v-else>
+        <ArtistBio :exhibitions="exhibitions"></ArtistBio>
+      </template>
     </main>
   </div>
 </template>
 
 <script>
   import store from '../store';
+  import ArtistStats from '../components/ArtistStats.vue'
+  import ArtistBio from '../components/ArtistBio.vue'
 
   export default {
     name: 'ArtistView',
     store,
+    components:{
+      ArtistStats,
+      ArtistBio
+    },
     created: function(){
       this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
       this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
-      this.$watch( '$route.params.id', ()=>{
+    },
+
+    watch:{
+      $route: function(){
         this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
         this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
-      });
+      }
     },
+
     computed: {
       artist: function(){
         return this.$store.state.artist.currentArtist;
+      },
+      exhibitions: function(){
+        return this.$store.state.artist.exhibitions;
       }
     }
+
   }
 </script>

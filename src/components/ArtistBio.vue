@@ -15,7 +15,7 @@
             v-for='e in group[1]'
             :key="e.id"
             :class="{solo: category[0]=='Exhibitions' && e.artistsCount==1}">
-            <router-link :to="{name: 'exhibition', params: {id: e.id}}">
+            <router-link :to="{name: 'exhibition', params: {id: e.ikonid}}">
               {{e.title}}
               <small v-if="category[0]=='Exhibitions' && e.artistsCount==1">(solo)</small>
             </router-link>
@@ -42,13 +42,11 @@
       groupBy,
       moment
     },
+    props: ['exhibitions'],
 
     computed: {    
-      exhibitions: function(){
-        return this.$store.state.artist.exhibitions;
-      },
-
       exhibiting: function(){
+        console.log(this.exhibitions);
         return this.exhibitions.filter( (e)=>e.relation=='exhibiting' );
       },
 

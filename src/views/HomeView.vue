@@ -5,25 +5,16 @@
         <router-link to="/artists">
           Artists
         </router-link>
-        <small v-if="artistsCount">
-          ({{artistsCount}})
-        </small>
       </li>
       <li>
         <router-link to="/exhibitions">
           Exhibitions
         </router-link>
-        <small v-if="exhibitionsCount">
-          ({{exhibitionsCount}})
-        </small>
       </li>
       <li>
         <router-link to="/galleries">
           Galleries
         </router-link>
-        <small v-if="galleriesCount">
-          ({{galleriesCount}})
-        </small>
       </li>
     </ul>
   </div>

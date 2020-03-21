@@ -9,8 +9,8 @@ import GalleryListView from '../views/GalleryListView.vue'
 
 
 import ArtistView from '../views/ArtistView.vue'
-import ArtistStats from '../components/ArtistStats.vue'
-import ArtistBio from '../components/ArtistBio.vue'
+// import ArtistStats from '../components/ArtistStats.vue'
+// import ArtistBio from '../components/ArtistBio.vue'
 
 import ExhibitionView from '../views/ExhibitionView.vue'
 import GalleryView from '../views/GalleryView.vue'
@@ -22,24 +22,12 @@ const routes = [
   { name: 'artists',     path: '/artists',         component: ArtistListView},
   { name: 'galleries',	 path: '/galleries',       component: GalleryListView },
 
-  { name: 'exhibition',  path: '/exhibitions/:id', component: ExhibitionView},
-  { path: '/artists/:id',     component: ArtistView,
-    children: [{
-      name: 'artist',
-      path: '/',
-      component: ArtistBio
-    },
-    {
-      name: 'artist.stats',
-      path: 'stats',
-      component: ArtistStats
-
-    }]
-  },
-  { name: 'gallery',     path: '/galleries/:id',   component: GalleryView},
+  { name: 'exhibition',  path: '/exhibition/:id', component: ExhibitionView},
+  { name: 'artist',      path: '/artist/:id/:page?',     component: ArtistView},
+  { name: 'gallery',     path: '/gallery/:id',   component: GalleryView}
 ]
 const router = new VueRouter({
-  routes, // short for `routes: routes`
+  routes
 });
 
 router.beforeEach( (to, from, next)=>{

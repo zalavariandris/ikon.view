@@ -8,19 +8,19 @@
     </vpaginate>
     <table>
       <thead>
-        <td width="50%"><input v-model="search" placeholder="search title"></td>
-        <td width="20%">gallery</td>
-        <td width="60px">opening</td>
-        <td width="60px">closing</td>
+        <td><input v-model="keyword" placeholder="search title"></td>
+        <td>gallery</td>
+        <td>opening</td>
+        <td>closing</td>
       </thead>
       <tbody>
         <tr 
         v-for='e in exhibitions' 
-        v-bind:key="e.id">
+        v-bind:key="e.ikonid">
           <td>
             <router-link v-bind:to="{
               name: 'exhibition', 
-              params: {id: e.id}}">
+              params: {id: e.ikonid}}">
               {{e.title}}
             </router-link>
           </td>
@@ -28,7 +28,7 @@
             <router-link :to="{
               name: 'gallery', 
               params: {id: e.gallery_id}}">
-              {{e.gallery}}
+              {{e.gallery_name}}
             </router-link>
           </td>
           <td>
@@ -48,53 +48,51 @@
   import store from '../store'
   import vpaginate from '../components/vpaginate'
   import moment from 'moment'
+  import axios from 'axios'
   export default {
     name: 'ExhibitionListView',
     store,
     components: {
       vpaginate
     },
-    methods:{
-      moment
-    },
-
     data: function(){
       return {
-        search: "",
+        keyword: "",
         limit: 15,
-        page: 1
+        page: 1,
+        exhibitions: [],
+        count: -1
       };
     },
 
-    created: function(){
-      this.$store.dispatch('searchExhibitions', {
-        title: this.search,
-        limit: this.limit,
-        page: this.page
-      });
-
-      this.$watch(()=>[this.search, this.limit, this.page], ()=>{
-        this.$store.dispatch('searchExhibitions', {
-          title: this.search,
-          limit: this.limit,
-          page: this.page
-        });
+    mounted: function(){
+      window.axios = axios;
+      this.search();
+      this.$watch(()=>[this.keyword, this.limit, this.page], ()=>{
+        this.search()
       })
     },
-    
-    computed:{
-      exhibitions: function(){
-        return this.$store.state.search.exhibitions.data;
-      },
 
-      count: function(){
-        return this.$store.state.search.exhibitions.count;
+    methods:{
+      moment,
+      search: function(){
+        axios.get('http://localhost:3000/api/exhibitions', {
+          params: {
+            title: this.keyword,
+            limit: this.limit,
+            offset: (this.page-1)*this.limit
+          }
+        })
+        .then(response => {
+          this.exhibitions = response.data.data;
+          this.count = response.data.count;
+        });
       }
     },
 
     watch:{
-      search: function(){
-        this.page = 1;
+      keyword: function(){
+        this.page=1;
       }
     }
   }
