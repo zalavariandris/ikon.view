@@ -17,14 +17,14 @@ import GalleryView from '../views/GalleryView.vue'
 
 Vue.use(VueRouter)
 const routes = [
-  { name: 'home',        path: '/', component: HomeView},
-  { name: 'exhibitions', path: '/exhibitions',     component: ExhibitionListView },
-  { name: 'artists',     path: '/artists',         component: ArtistListView},
-  { name: 'galleries',	 path: '/galleries',       component: GalleryListView },
+  { name: 'home',        path: '/',                  component: HomeView},
+  { name: 'exhibitions', path: '/exhibitions',       component: ExhibitionListView },
+  { name: 'artists',     path: '/artists',           component: ArtistListView},
+  { name: 'galleries',	 path: '/galleries',         component: GalleryListView },
 
-  { name: 'exhibition',  path: '/exhibition/:id', component: ExhibitionView},
-  { name: 'artist',      path: '/artist/:id/:page?',     component: ArtistView},
-  { name: 'gallery',     path: '/gallery/:id',   component: GalleryView}
+  { name: 'exhibition',  path: '/exhibition/:id',    component: ExhibitionView},
+  { name: 'artist',      path: '/artist/:id/:page?', component: ArtistView},
+  { name: 'gallery',     path: '/gallery/:id',       component: GalleryView}
 ]
 const router = new VueRouter({
   routes

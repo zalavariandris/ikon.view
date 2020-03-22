@@ -59,7 +59,7 @@
         console.log('init simulation')
         this.simgraph = {
           nodes: this.graph.nodes().map( (n)=>{
-            return {id: n, r: this.graph.getNodeAttribute(n, 'size')};
+            return {id: n, r: this.graph.getNodeAttribute(n, 'size') || 10};
           }),
 
           edges: this.graph.edges().map( (e)=>{
@@ -188,7 +188,7 @@
           .attr('class', 'node')
           .classed('exhibition', (d)=>d.id[0]=='e' )
           .classed('artist', (d)=>d.id[0]=='a' )
-          .attr('r',    (d)=> this.graph.getNodeAttribute(d.id, 'size') || 40)
+          .attr('r', (d)=> this.graph.getNodeAttribute(d.id, 'size'))
           .on("mouseover", showDetails)
           .on("mouseout", hideDetails)
           .merge(node)
@@ -206,7 +206,7 @@
         let link = this.viewport.select('.links')
         .selectAll('.link')
         .data(this.simgraph.edges, (d)=>d.source+d.target );
-
+        // debugger
         // enter + update
         link.enter()
         .append('path')

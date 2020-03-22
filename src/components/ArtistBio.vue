@@ -46,7 +46,6 @@
 
     computed: {    
       exhibiting: function(){
-        console.log(this.exhibitions);
         return this.exhibitions.filter( (e)=>e.relation=='exhibiting' );
       },
 

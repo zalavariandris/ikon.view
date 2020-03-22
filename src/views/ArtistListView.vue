@@ -28,6 +28,7 @@
   import store from '../store'
   import vpaginate from '../components/vpaginate'
   import axios from 'axios'
+  import config from '@/config.js'
   export default {
     name: 'ArtistListView',
     store,
@@ -61,7 +62,7 @@
 
     methods:{
       search: function(){
-        axios.get('http://localhost:3000/api/artists', {
+        axios.get(config.servicePath+'/artists', {
           params: {
             name: this.keyword,
             limit: this.limit,

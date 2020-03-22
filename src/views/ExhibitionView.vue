@@ -16,7 +16,7 @@
         </router-link>
       </p>
       <p>
-        <a target='blank' :href="'https://ikon.hu/cal/'+exhibition.id">https://ikon.hu/cal/{{exhibition.id}}</a>
+        <a target='blank' :href="'https://ikon.hu/cal/'+exhibition.ikonid">https://ikon.hu/cal/{{exhibition.ikonid}}</a>
       </p>
     </header>
     <section class='info'>
@@ -64,24 +64,24 @@
   import store from '../store'
   import moment from 'moment'
   import axios from 'axios'
-  window.axios = axios;
+  import config from '@/config.js'
+
   export default {
     name: 'ExhibitionView',
     store,
     methods:{
       moment,
       fetch: function(){
-        axios.get('http://localhost:3000/api/exhibition/'
+        axios.get(config.servicePath+'/exhibition/'
           +this.$route.params.id)
         .then(response => {
           this.exhibition = response.data;
         });
 
-        axios.get('http://localhost:3000/api/exhibition/'
+        axios.get(config.servicePath+'/exhibition/'
           +this.$route.params.id
           +'/artists')
         .then( response => {
-          console.log('artists', response.data);
           this.all = response.data;
         } );
       }
@@ -106,7 +106,6 @@
 
     computed: {
       artists: function(){
-        console.log(this.all)
         return this.all.filter( (a)=>a.relation == 'exhibiting' );
       },
 

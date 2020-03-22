@@ -26,6 +26,8 @@
   import store from '../store'
   import vpaginate from '../components/vpaginate'
   import axios from 'axios'
+  import config from '@/config.js'
+
   export default {
     name: 'GalleryListView',
     store,
@@ -52,7 +54,7 @@
 
     methods: {
       search: function(){
-        axios.get('http://localhost:3000/api/galleries', {
+        axios.get(config.servicePath+'/galleries', {
           params: {
             name: this.keyword,
             limit: this.limit,

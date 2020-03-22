@@ -21,7 +21,7 @@
 
     <main>
       <template v-if="$route.params.page=='stats'">
-        <ArtistStats :exhibitions="exhibitions"></ArtistStats>
+        <ArtistStats :exhibitions="exhibitions" :graph="graph"></ArtistStats>
       </template>
       <template v-else>
         <ArtistBio :exhibitions="exhibitions"></ArtistBio>
@@ -34,6 +34,9 @@
   import store from '../store';
   import ArtistStats from '../components/ArtistStats.vue'
   import ArtistBio from '../components/ArtistBio.vue'
+  import axios from 'axios'
+  import config from '@/config.js'
+  import graphology from 'graphology'
 
   export default {
     name: 'ArtistView',
@@ -42,9 +45,27 @@
       ArtistStats,
       ArtistBio
     },
+
+    data: function(){
+      return {
+        graph: null
+      }
+    },
     created: function(){
       this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
       this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
+
+      axios.get(config.servicePath+`/artist/${this.$route.params.id}/graph`, {
+        params: {
+          name: this.keyword,
+          limit: this.limit,
+          offset: (this.page-1)*this.limit
+        }
+      })
+      .then(response => {
+        let graph = new graphology.Graph.from(response.data);
+        this.graph = graph;
+      });
     },
 
     watch:{

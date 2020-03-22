@@ -1,4 +1,5 @@
 import axios from 'axios'
+import config from '@/config.js'
 
 const artistStore = {
     namespaced: true,
@@ -19,8 +20,7 @@ const artistStore = {
 
     actions: {
         fetchArtist: (context, id)=>{
-          console.log('fetchArtist', id)
-          axios.get('http://localhost:3000/api/artist/'
+          axios.get(config.servicePath+'/artist/'
             +id)
           .then( (response)=>{
             context.commit('SET_CURRENT_ARTIST', response.data);
@@ -28,7 +28,7 @@ const artistStore = {
         },
 
         fetchExhibitions: (context, id)=>{
-          axios.get('http://localhost:3000/api/artist/'
+          axios.get(config.servicePath+'/artist/'
             +id
             +'/exhibitions')
           .then( (response)=>{

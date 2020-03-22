@@ -43,3 +43,6 @@ Search Galleries View
 # artist, exhibition, gallery detail views
 - update on route change (new id)
 - links to exhibitions/galleries/artists has ids
+
+# Exhibitions View
+- ikon link has valid id

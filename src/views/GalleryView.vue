@@ -30,6 +30,8 @@
   import {groupBy} from '../utils'
   import moment from 'moment'
   import axios from 'axios'
+  import config from '@/config.js'
+
   export default {
     name: 'GalleryView',
     store,
@@ -43,18 +45,16 @@
       groupBy,
       moment,
       fetch: function(){
-        axios.get('http://localhost:3000/api/gallery/'
+        axios.get(config.servicePath+'/gallery/'
           +this.$route.params.id)
         .then(response => {
-          console.log(response)
           this.gallery = response.data;
         });
 
-        axios.get('http://localhost:3000/api/gallery/'
+        axios.get(config.servicePath+'/gallery/'
           +this.$route.params.id
           +'/exhibitions')
         .then(response => {
-          console.log(response)
           this.exhibitions = response.data;
         });
       }

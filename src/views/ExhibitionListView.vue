@@ -45,10 +45,12 @@
 </template>
 
 <script>
-  import store from '../store'
-  import vpaginate from '../components/vpaginate'
+  import store from '@/store'
+  import vpaginate from '@/components/vpaginate'
   import moment from 'moment'
   import axios from 'axios'
+  import config from '@/config.js'
+
   export default {
     name: 'ExhibitionListView',
     store,
@@ -76,7 +78,7 @@
     methods:{
       moment,
       search: function(){
-        axios.get('http://localhost:3000/api/exhibitions', {
+        axios.get(config.servicePath+'/exhibitions', {
           params: {
             title: this.keyword,
             limit: this.limit,

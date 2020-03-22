@@ -8,7 +8,6 @@
   import FA2Layout from 'graphology-layout-forceatlas2/worker';
   import forceAtlas2 from 'graphology-layout-forceatlas2';
   import randomLayout from 'graphology-layout/random';
-  import circular from 'graphology-layout/circular';
   import * as sigma from 'sigma';
   export default {
     name: 'sigmagraph',
