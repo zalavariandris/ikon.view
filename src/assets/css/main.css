@@ -97,11 +97,28 @@ a{
 }
 a:hover{
   text-decoration: underline;
+  /*border-bottom: 1px solid black;*/
 }
 
 a.router-link-exact-active{
   text-decoration: underline;
+  /*border-bottom: 1px solid black;*/
 }
+
+/*nav a{
+  padding: 0 0.5em;
+  margin-left: -0.5em;
+}
+
+nav a:hover{
+  text-decoration: none;
+  border-bottom: 1px solid black;
+}
+
+nav a.router-link-exact-active{
+  text-decoration: none;
+  border-bottom: 1px solid black;
+}*/
 
 h1 a.router-link-active{
   text-decoration: inherit;

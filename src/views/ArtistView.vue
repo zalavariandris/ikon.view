@@ -31,9 +31,9 @@
 </template>
 
 <script>
-  import store from '../store';
-  import ArtistStats from '../components/ArtistStats.vue'
-  import ArtistBio from '../components/ArtistBio.vue'
+  import store from '@/store';
+  import ArtistStats from '@/components/ArtistStats.vue'
+  import ArtistBio from '@/components/ArtistBio.vue'
   import axios from 'axios'
   import config from '@/config.js'
   import graphology from 'graphology'
@@ -51,6 +51,7 @@
         graph: null
       }
     },
+
     created: function(){
       this.$store.dispatch('artist/fetchArtist', this.$route.params.id);
       this.$store.dispatch('artist/fetchExhibitions', this.$route.params.id);
@@ -65,6 +66,22 @@
       .then(response => {
         let graph = new graphology.Graph.from(response.data);
         this.graph = graph;
+        for(let n of this.graph.nodes()){
+
+          let type = this.graph.getNodeAttribute(n, 'type');
+          this.graph.setNodeAttribute(n, 'class', type)
+
+          if(type=='artist'){
+            this.graph.setNodeAttribute(n, 'label',this.graph.getNodeAttribute(n, 'name'))
+            const degreeCentrality = this.graph.getNodeAttribute(n, 'degree')
+            this.graph.setNodeAttribute(n, 'size', Math.log1p(degreeCentrality**3)*5);
+          }
+
+          if(type=='exhibition'){
+            this.graph.setNodeAttribute(n, 'label',this.graph.getNodeAttribute(n, 'title'))
+            this.graph.setNodeAttribute(n, 'size', 10);
+          }
+        }
       });
     },
 

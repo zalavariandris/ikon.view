@@ -5,7 +5,8 @@
 
 <script>
   import * as d3 from "d3";
-  import subGraph from 'graphology-utils/subgraph';
+  import {subGraph} from 'graphology-utils';
+  
   export default {
     name: 'd3graphology',
     props: ['graph'],
@@ -293,47 +294,47 @@
 </script>
 
 <style>
-  .node{
+  .d3graphology .node{
     fill: darkgrey;
     transition: fill 0.5s, opacity 0.5s;
   }
-  .node.artist{
+  .d3graphology .node.artist{
     fill: hsl(220, 26%, 68%);
   }
 
-  .node.exhibition{
+  .d3graphology .node.exhibition{
     fill: hsl(45, 100%, 69%);
   }
 
-  .node.highlighted{
+  .d3graphology .node.highlighted{
     
   }
 
-  .viewport.nodes-highlighted .node.artist:not(.highlighted){
+  .d3graphology .viewport.nodes-highlighted .node.artist:not(.highlighted){
     fill: hsl(220, 26%, 90%);
   }
 
-  .viewport.nodes-highlighted .node.exhibition:not(.highlighted){
+  .d3graphology .viewport.nodes-highlighted .node.exhibition:not(.highlighted){
     fill: hsl(48, 78%, 90%);
   }
 
-  .link{
+  .d3graphology .link{
     stroke: hsl(60, 18%, 87%);
     stroke-width: 10px;
     transition: stroke-width 0.5s, stroke 0.5s;
   }
 
-  .link.highlighted{
+  .d3graphology .link.highlighted{
     stroke: hsl(60, 18%, 50%);
     stroke-width: 15px;
   }
   
-  .viewport.nodes-highlighted .link:not(.highlighted){
+  .d3graphology .viewport.nodes-highlighted .link:not(.highlighted){
     stroke: hsl(60, 18%, 90%);
     stroke-width: 6px;
   }
 
-  text{
+  .d3graphology text{
     fill: black;
     /*text-shadow: 1px 1px 0px white;*/
   }

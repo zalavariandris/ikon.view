@@ -1,32 +1,33 @@
 <template>
   <div>
     <!-- <h2>Statistics</h2> -->
-    <section>
+    <figure>
       <!-- <h3>Timeline</h3> -->
       <careertrajectory :plot="plot" :legend="legend"></careertrajectory>
-    </section>
-    <section>
+    </figure>
+    <figure>
+      <vgraph v-if="graph" :graph="graph"></vgraph>
       <!-- <h3>Ego network</h3> -->
-      <figure v-if="graph">
+<!--       <figure v-if="graph">
         <d3graphology :graph="graph"></d3graphology>
         <figcaption class='stats'>
           nodes: {{graph.nodes().length}}
           edges: {{graph.edges().length}}
         </figcaption>
-      </figure>
-    </section>
+      </figure> -->
+    </figure>
   </div>
 </template>
 
 <script>
-  import d3graphology from '../components/d3graphology.vue';
+  import vgraph from '../components/vgraph.vue'
   import careertrajectory from '../components/careertrajectory.vue';
   import moment from 'moment'
 
   export default {
     components:{
       careertrajectory, 
-      d3graphology
+      vgraph
     },
 
     props: ['exhibitions', 'graph'],
@@ -69,7 +70,10 @@
 }
 
 figure{
-  margin: 0;
+  margin: 3em 0;
+}
+figure svg{
+  width: 100%;
 }
 
 section{

@@ -1,9 +1,9 @@
 <template>
-  <div class='timeline'>
+  <div class='careertrajectory'>
     <div class="tooltip" ref='tooltip'>
         TOOLTIP
     </div>
-    <svg :viewBox="`0,0, ${width}, ${height}`" style="width: 100%; height: 100%;">
+    <svg :viewBox="`0,0, ${width}, ${height}`">
         <g class="axis">
             <g class="xaxis">
                 <line class="domain"
@@ -113,6 +113,7 @@ export default{
             width: 650,
             height: 250,
             margin: {top: 8, left: 30, bottom: 30, right: 10},
+            hoveredItem: null
         }
     },
 
@@ -200,7 +201,7 @@ export default{
 
 </script>
 <style>
-.timeline{
+.careertrajectory{
     position: relative;
     /*border: 1px solid black;*/
     font-family: sans-serif;
@@ -209,7 +210,7 @@ export default{
     background: linear-gradient(0deg, rgba(200,200,200,1) 0%, rgba(255,255,255,1) 100%);*/
 }
 
-.tooltip{
+.careertrajectory .tooltip{
     position: absolute;
     /*visibility: hidden;*/
     opacity: 0.0;
@@ -226,7 +227,7 @@ export default{
     white-space: pre-wrap;
 }
 
-.timeline svg{
+.careertrajectory svg{
     overflow: visible;
 }
 
