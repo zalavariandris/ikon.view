@@ -21,7 +21,7 @@
             </router-link>
             -
             <router-link :to="{name: 'gallery', params: {id: e.gallery_id}}">
-              {{e.gallery}}
+              {{e.gallery_name}}
             </router-link>
           </li>
         </ul>
@@ -43,6 +43,10 @@
       moment
     },
     props: ['exhibitions'],
+
+    created: function(){
+      window.bio = this;
+    },
 
     computed: {    
       exhibiting: function(){

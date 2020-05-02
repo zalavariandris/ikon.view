@@ -20,6 +20,12 @@
                     <line y2="6"></line>
                     <text x="-0.8em" y="1.3em">{{tick.getFullYear()}}</text>
                 </g>
+
+                <text
+                :x="`${width/2}px`"
+                :y="`${height+10}px`"
+                style="transform: rotate(0deg);"
+                >{{xlabel}}</text>
             </g>
 
             <g class="yaxis">
@@ -28,8 +34,12 @@
                 :style="{ transform: `translate(${margin.left}px, ${yscale(tick)}px)`}"
                 :key="i">
                     <line :x2="xscale.range()[1]-xscale.range()[0]"></line>
-                    <text x="0" y="0">{{tick.toFixed(2)}}</text>
+                    <text x="-10" y="0">{{tick.toFixed()}}</text>
                 </g>
+
+                <text
+                style="transform: translateY(30%) rotate(-90deg)"
+                >{{ylabel}}</text>
             </g>
         </g>
 
@@ -37,6 +47,7 @@
             <g class="line">
                 <polyline :points="vertices"/>
             </g>
+
             <g class="stem">
                 <line 
                     v-for="(d, i) in plot"
@@ -53,6 +64,30 @@
             <g class="scatter">
                 <circle
                     v-for="(d, i) in plot"
+                    :key="i"
+                    @mouseover="showTooltip(d)"
+                    @mouseleave="hideTooltip(d)"
+                    :cx="xscale(d.x)"
+                    :cy="yscale(d.y)"
+                    :fill="d.color"
+                ></circle>
+            </g>
+
+            <g class="scatter">
+                <circle
+                    v-for="(d, i) in plotGroup"
+                    :key="i"
+                    @mouseover="showTooltip(d)"
+                    @mouseleave="hideTooltip(d)"
+                    :cx="xscale(d.x)"
+                    :cy="yscale(d.y)"
+                    :fill="d.color"
+                ></circle>
+            </g>
+
+            <g class="scatter">
+                <circle
+                    v-for="(d, i) in plotSolo"
                     :key="i"
                     @mouseover="showTooltip(d)"
                     @mouseleave="hideTooltip(d)"
@@ -92,6 +127,8 @@
 <script>
 import {peaks} from '../utils'
 import * as d3 from "d3";
+import moment from 'moment'
+import {groupBy} from '../utils'
 
 export default{
     name: 'careertrajectory',
@@ -106,14 +143,16 @@ export default{
         });
     },
 
-    props: ['plot', 'legend', 'xlim', 'ylim'],
+    props: ['exhibitions'],
 
     data: function(){
         return {
             width: 650,
             height: 250,
             margin: {top: 8, left: 30, bottom: 30, right: 10},
-            hoveredItem: null
+            hoveredItem: null,
+            xlabel: "Time",
+            ylabel: "Number of Exhibitions"
         }
     },
 
@@ -134,6 +173,46 @@ export default{
     },
 
     computed: {
+        plot: function(){
+            // const groupExhibitions = this.exhibitions.filter(e=>e.artistsCount>1);
+
+            const groups = groupBy(this.exhibitions, e=>moment(e.opening).year());
+            return Array.from(groups).map( ([year, exhibitions])=>new Object({
+              x: moment({year}),
+              y: exhibitions.length,
+              color: 'lightgrey'
+            } ));
+        },
+
+        plotSolo: function(){
+            const soloExhibitions = this.exhibitions.filter(e=>e.artistsCount==1);
+
+            const groups = groupBy(soloExhibitions, e=>moment(e.opening).year());
+            return Array.from(groups).map( ([year, exhibitions])=>new Object({
+              x: moment({year}),
+              y: exhibitions.length,
+              color: 'pink'
+            } ));
+        },
+
+        plotGroup: function(){
+            const groupExhibitions = this.exhibitions.filter(e=>e.artistsCount>1);
+
+            const groups = groupBy(groupExhibitions, e=>moment(e.opening).year());
+            return Array.from(groups).map( ([year, exhibitions])=>new Object({
+              x: moment({year}),
+              y: exhibitions.length,
+              color: 'lightsteelblue'
+            } ));
+        },
+
+        legend: function(){
+            return {
+              solo: 'pink',
+              group: 'lightsteelblue'
+            }
+        },
+
         // all plots
         xdomain: function(){
             const x = this.plot.map( (d)=>d.x );
