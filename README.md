@@ -1,7 +1,9 @@
 # ikon.view
 
-## Demo
+working demo:
 https://zalavariandris.github.io/ikon.view/
+
+![screenshot](docs/screenshot-artist.png)
 
 ## TODOS
 - [x] Landing page
