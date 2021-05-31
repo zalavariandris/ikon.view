@@ -1,6 +1,8 @@
 # ikon.view
 
-A web application, to browse hungarian artists and exhibitions. Based on (IkOn's)[https://ikon.hu/] database
+A web application, to browse hungarian artists and exhibitions. Built with Vue.
+Original data source from [https://ikon.hu/] (2020 december)
+> :warning: The api server is hosted on heroku free tier. So it need a couple of minutes to launch.
 
 
 working demo:
