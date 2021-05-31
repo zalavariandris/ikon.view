@@ -5,11 +5,11 @@ Original data source from [https://ikon.hu/] (2020 december)
 
 :warning: The api server is hosted on heroku for free. It needs a couple of minutes to launch.
 
-api: https://github.com/zalavariandris/ikon.api
-
-
 working demo:
 https://zalavariandris.github.io/ikon.view/
+
+- the api: api: https://github.com/zalavariandris/ikon.api
+- network visualization: https://github.com/zalavariandris/ikon.graph
 
 ![screenshot](docs/screenshot-artist.png)
 
