@@ -2,7 +2,9 @@
 
 A web application to browse hungarian artists and exhibitions. Built with Vue.
 Original data source from [https://ikon.hu/] (2020 december)
+
 :warning: The api server is hosted on heroku for free. It needs a couple of minutes to launch.
+
 api: https://github.com/zalavariandris/ikon.api
 
 
