@@ -1,5 +1,8 @@
 # ikon.view
 
+A web application, to browse hungarian artists and exhibitions. Based on (IkOn's)[https://ikon.hu/] database
+
+
 working demo:
 https://zalavariandris.github.io/ikon.view/
 
